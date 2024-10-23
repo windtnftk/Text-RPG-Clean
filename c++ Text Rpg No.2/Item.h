@@ -55,8 +55,5 @@ public:
 	void UseItem(vector<ItemMMOR>::iterator Item);
 	// handleItem을 원하는 위치로 변경하는 함수
 	void ChangeHandleItem(int item);
-	// 
-
-
 };
 

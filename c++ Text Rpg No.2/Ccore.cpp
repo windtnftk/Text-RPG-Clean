@@ -26,7 +26,7 @@ void Ccore::BattleStartInit()
 		while (End)
 		{
 			EneMy::GetInst()->SetEnemyInfo();
-			std::cout << "[1.일반공격] " << " [2.아이템사용] " << "[3.상태창]" << std::endl << std::endl;
+			std::cout << "[1.일반공격]" << " [2.아이템사용] " << "[3.상태창]" << std::endl << std::endl;
 			int input = 0;
 			std::cin >> input;
 			// 이름 가져오는거 진행 ㄱ~~~

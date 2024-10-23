@@ -2,7 +2,7 @@
 #include "Item.h"
 
 string ItemArr[(int)ItemId::End] =
-{
+{	// 지금은 index 9ea만 사용 가능 나중에 구조 수정 예정(24.10.23)
 	"HealthPortion",
 	"BigHealthPortion",
 	"PowerPortion",
@@ -12,6 +12,7 @@ string ItemArr[(int)ItemId::End] =
 	"weapon3",
 	"FirePortion",
 	"BigFirePortion",
+	"VeryBigThis"
 };
 
 
@@ -37,16 +38,11 @@ void MainItem::ItemInit()
 	for (int i = 0; i < 9; ++i)
 	{
 		int rendom = distribution(gen) % 10;
-		if (9 == rendom)
-		{
-			--rendom;
-		}
 		ItemMMOR NewItem = { static_cast<ItemId>(rendom),ItemArr[rendom] };
 		ItemBag.push_back(NewItem);
-		
 	}
 	handleItem = ItemBag.begin();
-	//OpenItemBag();
+	OpenItemBag();
 }
 
 void MainItem::HandleItemErase(vector<ItemMMOR>::iterator& ItemId)

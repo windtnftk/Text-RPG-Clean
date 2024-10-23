@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="리소스 파일">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Object">
+      <UniqueIdentifier>{c85213e1-1b17-4796-965e-c192da6a71fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\1. MAIN SYSTEM">
+      <UniqueIdentifier>{f736d47f-9a89-4084-89f4-71f2d886549b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\4. Item">
+      <UniqueIdentifier>{e2e8fb82-5e21-4cfa-b8c6-f35998b4bbe3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\3. Enemy">
+      <UniqueIdentifier>{3fa52727-1d0d-4759-b99e-52f137847a59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\2. Hero">
+      <UniqueIdentifier>{af434b69-b35f-4158-97dc-a0999357a74d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Default">
+      <UniqueIdentifier>{f0550d10-b2a1-4f10-99d5-14588414650f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="진행 사항할 사힝.cpp" />
+    <ClCompile Include="Enemy.cpp">
+      <Filter>Object\3. Enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="Item.cpp">
+      <Filter>Object\4. Item</Filter>
+    </ClCompile>
+    <ClCompile Include="Ccore.cpp">
+      <Filter>Object\1. MAIN SYSTEM</Filter>
+    </ClCompile>
+    <ClCompile Include="Default.cpp">
+      <Filter>Default</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="Enemy.h">
+      <Filter>Object\3. Enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="Item.h">
+      <Filter>Object\4. Item</Filter>
+    </ClInclude>
+    <ClInclude Include="Ccore.h">
+      <Filter>Object\1. MAIN SYSTEM</Filter>
+    </ClInclude>
+    <ClInclude Include="Default.h">
+      <Filter>Default</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="EnemyInit.txt" />
+  </ItemGroup>
+</Project>

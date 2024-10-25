@@ -22,6 +22,6 @@ extern bool GameOff;
 						static type mgr; \
 						return &mgr;\
 						}\
-						private:\
+						protected:\
 						type();\
 						~type();

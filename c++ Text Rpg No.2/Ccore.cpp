@@ -2,12 +2,13 @@
 #include "Ccore.h"
 #include "Item.h"
 #include "Enemy.h"
+#include "consumable.h"
 
 void Ccore::Init()
 {
 	if (Ccore::GetInst()->ModeCur != GameMode::GameEnd)
 	{
-		MainItem::GetInst()->ItemInit();
+		Consumable::GetInst()->ItemInit();
 		EneMy::GetInst()->EnemyInit();
 		EneMy::GetInst()->ViewEnemy();
 	}
@@ -55,7 +56,7 @@ void Ccore::BattleStartInit()
 void Ccore::Progress()
 {
 	EneMy::GetInst()->ViewEnemy();
-	MainItem::GetInst()->OpenItemBag();
+	//MainItem::GetInst()->OpenItemBag();
 }
 void Ccore::GameStartSetOutPut()
 {

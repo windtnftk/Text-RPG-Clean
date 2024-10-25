@@ -23,6 +23,12 @@
     <Filter Include="Default">
       <UniqueIdentifier>{f0550d10-b2a1-4f10-99d5-14588414650f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Object\4. Item\Equipment">
+      <UniqueIdentifier>{0d4b602a-5444-42ab-85dd-8c1758ef3ec9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\4. Item\consumable">
+      <UniqueIdentifier>{15fcba93-c21a-4f84-a7e1-97a721c05255}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
@@ -39,6 +45,9 @@
     <ClCompile Include="Default.cpp">
       <Filter>Default</Filter>
     </ClCompile>
+    <ClCompile Include="consumable.cpp">
+      <Filter>Object\4. Item\consumable</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -53,6 +62,9 @@
     </ClInclude>
     <ClInclude Include="Default.h">
       <Filter>Default</Filter>
+    </ClInclude>
+    <ClInclude Include="consumable.h">
+      <Filter>Object\4. Item\consumable</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

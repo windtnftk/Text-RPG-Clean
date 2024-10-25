@@ -40,7 +40,7 @@ public:
 public:
 	
 	// 아이템 init
-	void ItemInit();
+	virtual void ItemInit();
 	//HandleItem 지우기, 일단 privite 로 만들어서 사용해야 될듯
 	void HandleItemErase(vector<ItemMMOR>::iterator& ItemId);
 	// 아이템 찾아주는 함수 그리고 아이템 나열 하는 함수
@@ -55,5 +55,7 @@ public:
 	void UseItem(vector<ItemMMOR>::iterator Item);
 	// handleItem을 원하는 위치로 변경하는 함수
 	void ChangeHandleItem(int item);
+
+
 };
 

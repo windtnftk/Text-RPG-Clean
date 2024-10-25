@@ -114,7 +114,7 @@ void MainItem::OpenItemBag()
 	for (int i = 0; i < ItemBag.size(); ++BeginhandleItem,++i)
 	{
 		//int GetId = GetInst()->SelectId(BeginhandleItem);
-		string GetName =GetInst()->SelectName(BeginhandleItem);
+		string GetName = SelectName(BeginhandleItem);
 		std::cout << i+1 << ". " << GetName << std::endl;
 	}
 
@@ -131,5 +131,6 @@ MainItem::MainItem()
 
 MainItem::~MainItem()
 {
-	
+	delete &ItemBag;
+	delete &handleItem;
 }

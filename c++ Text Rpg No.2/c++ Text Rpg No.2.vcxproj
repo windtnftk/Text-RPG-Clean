@@ -132,7 +132,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Ccore.cpp" />
-    <ClCompile Include="consumable.cpp" />
+    <ClCompile Include="Equipment.cpp" />
     <ClCompile Include="Default.cpp" />
     <ClCompile Include="Item.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -144,7 +144,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Ccore.h" />
-    <ClInclude Include="consumable.h" />
+    <ClInclude Include="Equipment.h" />
     <ClInclude Include="Default.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="Item.h" />

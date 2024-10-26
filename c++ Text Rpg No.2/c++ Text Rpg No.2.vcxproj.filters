@@ -45,7 +45,7 @@
     <ClCompile Include="Default.cpp">
       <Filter>Default</Filter>
     </ClCompile>
-    <ClCompile Include="consumable.cpp">
+    <ClCompile Include="Equipment.cpp">
       <Filter>Object\4. Item\consumable</Filter>
     </ClCompile>
   </ItemGroup>
@@ -63,7 +63,7 @@
     <ClInclude Include="Default.h">
       <Filter>Default</Filter>
     </ClInclude>
-    <ClInclude Include="consumable.h">
+    <ClInclude Include="Equipment.h">
       <Filter>Object\4. Item\consumable</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,13 +2,13 @@
 #include "Ccore.h"
 #include "Item.h"
 #include "Enemy.h"
-#include "consumable.h"
+#include "Equipment.h"
 
 void Ccore::Init()
 {
 	if (Ccore::GetInst()->ModeCur != GameMode::GameEnd)
 	{
-		Consumable::GetInst()->ItemInit();
+		Equipment::GetInst()->ItemInit();
 		EneMy::GetInst()->EnemyInit();
 		EneMy::GetInst()->ViewEnemy();
 	}

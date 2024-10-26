@@ -34,7 +34,7 @@ void MainItem::ItemInit()
 
 	// 균일 분포에서 랜덤한 정수 생성 (0 이상 99 이하)
 	std::uniform_int_distribution<int> distribution(0, 99);
-	
+
 	for (int i = 0; i < 9; ++i)
 	{
 		int rendom = distribution(gen) % 10;
@@ -47,11 +47,11 @@ void MainItem::ItemInit()
 
 void MainItem::HandleItemErase(vector<ItemMMOR>::iterator& ItemId)
 {
-	
+
 	vector<ItemMMOR>::iterator it = ItemId;
 	if (it != ItemBag.end())
 	{
-		
+
 		ItemBag.erase(it);
 	}
 }
@@ -67,7 +67,7 @@ int MainItem::SelectId(const vector<ItemMMOR>::iterator& ItemId)
 		ItemMMOR Hi = *ItemId;
 		return (int)Hi.CurItemId;
 	}
-	
+
 }
 string MainItem::SelectName(const vector<ItemMMOR>::iterator& ItemId)
 {
@@ -95,27 +95,27 @@ void MainItem::UseItemManuOpen()
 		}
 	}
 	UseItem(handleItem);
-	
+
 }
 
 void MainItem::UseItem(vector<ItemMMOR>::iterator Item)
 {
-	
+
 }
 void MainItem::ChangeHandleItem(int item)
 {
-	
+
 }
 
 void MainItem::OpenItemBag()
 {
 	vector<ItemMMOR>::iterator BeginhandleItem = ItemBag.begin();
 
-	for (int i = 0; i < ItemBag.size(); ++BeginhandleItem,++i)
+	for (int i = 0; i < ItemBag.size(); ++BeginhandleItem, ++i)
 	{
 		//int GetId = GetInst()->SelectId(BeginhandleItem);
 		string GetName = SelectName(BeginhandleItem);
-		std::cout << i+1 << ". " << GetName << std::endl;
+		std::cout << i + 1 << ". " << GetName << std::endl;
 	}
 
 
@@ -131,6 +131,6 @@ MainItem::MainItem()
 
 MainItem::~MainItem()
 {
-	delete &ItemBag;
-	delete &handleItem;
+	delete& ItemBag;
+	delete& handleItem;
 }

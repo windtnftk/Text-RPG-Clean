@@ -8,7 +8,7 @@ void Ccore::Init()
 {
 	if (Ccore::GetInst()->ModeCur != GameMode::GameEnd)
 	{
-		Equipment::GetInst()->ItemInit();
+		MainItem::GetInst()->ItemInit();
 		EneMy::GetInst()->EnemyInit();
 		EneMy::GetInst()->ViewEnemy();
 	}

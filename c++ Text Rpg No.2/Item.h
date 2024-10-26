@@ -6,14 +6,33 @@ enum class ItemId
 	BigHealthPortion,
 	PowerPortion,
 	BigPowerPortion,
-	weapon1,
-	weapon2,
-	weapon3,
+	Potion4,
+	Potion5,
+	Potion6,
+	Potion7,
 	FirePortion,
 	BigFirePortion,
-
+	Weapon1 = 10,
+	Weapon2,
+	Weapon3,
+	Weapon4,
+	Weapon5,
+	Weapon6,
+	Weapon7,
+	Weapon8,
+	Weapon9,
+	Weapon10,
+	Equipment1 = 20,
+	Equipment2,
+	Equipment3,
+	Equipment4,
+	Equipment5,
+	Equipment6,
+	Equipment7,
+	Equipment8,
+	Equipment9,
+	Equipment10,
 	End =32,
-
 };
 // 그러니까 아이템을 사용할때 이름값만 가져오면 어떤아이템을 사용되는지 
 // 확인되고 사용하는 함수? 를 만들고 싶은거자나
@@ -25,6 +44,7 @@ struct ItemMMOR
 {
 	ItemId		CurItemId;
 	string		ItemName; //아이템 이름 저장
+	
 };
 
 
@@ -40,21 +60,25 @@ public:
 public:
 	
 	// 아이템 init
-	virtual void ItemInit();
+	void ItemInit();
 	//HandleItem 지우기, 일단 privite 로 만들어서 사용해야 될듯
 	void HandleItemErase(vector<ItemMMOR>::iterator& ItemId);
 	// 아이템 찾아주는 함수 그리고 아이템 나열 하는 함수
 	void OpenItemBag();
 	// iterator 주소값을 id int값 뽑아오는 함수
-	int SelectId(const vector<ItemMMOR>::iterator& ItemId);
+	ItemId SelectId(const vector<ItemMMOR>::iterator& ItemId);
 	// iterator 주소값을 id string값 뽑아오는 함수
 	string SelectName(const vector<ItemMMOR>::iterator& ItemId);
 	// 아이템 사용하는 함수
 	void UseItemManuOpen();
-	// handleItem로 지정한 아이템 사용하는 함수
-	void UseItem(vector<ItemMMOR>::iterator Item);
+	// 지정한 아이템 사용하는 함수 -> 그냥 효과 발동
+	void UseItem(ItemId Item);
+	// handleItem로 지정한 아이템 사용하는 함수 -> 소지품 사용 -> 아이템 삭제
+	void UseItem();
 	// handleItem을 원하는 위치로 변경하는 함수
 	void ChangeHandleItem(int item);
+	// ItemId 입력하면 장비에 추가하는 함수
+	void AddItem(ItemId item);
 
 
 };

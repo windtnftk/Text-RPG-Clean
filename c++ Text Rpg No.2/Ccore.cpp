@@ -8,6 +8,7 @@ void Ccore::Init()
 {
 	if (Ccore::GetInst()->ModeCur != GameMode::GameEnd)
 	{
+		
 		MainItem::GetInst()->ItemInit();
 		EneMy::GetInst()->EnemyInit();
 		EneMy::GetInst()->ViewEnemy();
@@ -17,7 +18,7 @@ void Ccore::Init()
 
 void Ccore::P_DataInit()
 {
-	Ccore::GetInst()->PlayerInfo = { "Player 1", 1,0 };
+	LodingData(PlayerDataSet::BasicData);
 }
 void Ccore::BattleStartInit()
 {
@@ -28,10 +29,7 @@ void Ccore::BattleStartInit()
 		{
 			EneMy::GetInst()->SetEnemyInfo();
 			std::cout << "[1.일반공격]" << " [2.아이템사용] " << "[3.상태창]" << std::endl << std::endl;
-			int input = 0;
-			std::cin >> input;
-			// 이름 가져오는거 진행 ㄱ~~~
-			switch (input)
+			switch (CinAuto())
 			{
 			case 1:
 				
@@ -73,10 +71,7 @@ void Ccore::G_M_Set()
 	{
 		std::cout << "1. 게임 난이도 변경" << std::endl;
 		std::cout << "2. 플레이어 이름 변경" << std::endl;
-		int input = 0;
-		std::cin >> input;
-		// 이름 가져오는거 진행 ㄱ~~~
-		switch (input)
+		switch (CinAuto())
 		{
 		case 1:
 			std::cout << "1. 게임 난이도 변경합니다." << std::endl << std::endl;
@@ -96,7 +91,6 @@ void Ccore::G_M_Set()
 }
 void Ccore::G_DifficultySeting()
 {
-	int input = 0;
 	bool End = true;
 	while (End)
 	{
@@ -104,9 +98,7 @@ void Ccore::G_DifficultySeting()
 		std::cout << "1. Easy" << std::endl;
 		std::cout << "2. Normal" << std::endl;
 		std::cout << "3. Hard" << std::endl;
-		
-		std::wcin >> input;
-		switch (input)
+		switch (CinAuto())
 		{
 		case 1:
 			std::cout << "게임 난이도를 Easy 로 설정합니다." << std::endl;
@@ -141,7 +133,7 @@ void Ccore::PlayerNameSeting()
 	bool YesName = true;
 	while (YesName) // 캐릭터 이름 생성 함수
 	{
-		NewName = Ccore::GetInst()->PlayerInfo.PlayerName;
+		NewName = PlayerInfo.PlayerName;
 		std::wcout << L"\n새로운 이름을 입력하세요\n";
 		std::wcin.ignore(); //입력 창 초기화(get line 작동을 위해 한번 비워줌)
 		std::getline(std::cin, input);
@@ -181,36 +173,98 @@ void Ccore::PlayerNameSeting()
 	}
 	Ccore::GetInst()->PlayerInfo.PlayerName = NewName;
 }
-void Ccore::SaveGame()
+void Ccore::DataFileSave(PlayerDataSet Data)
 {	
-	std::ofstream outFile("savegame.txt"); // 출력 스트림 생성
+	if (Data == PlayerDataSet::End || Data == PlayerDataSet::BasicData)
+	{
+		std::cout << "잘못된 데이터 파일입니다." << std::endl;
+	}
+	std::fstream file("PlayerData.txt", std::ios::in | std::ios::out);
+	
+	if (!file.is_open() || Data == PlayerDataSet::BasicData) {
+		std::cerr << "파일을 열 수 없습니다.\n";
+		return;
+	}
+	string CurData = PlayInfoToSting();
+	// 파일에서 데이터를 수정할 위치 계산
+	int lineNumber = static_cast<int>(Data);  // enum 값에 따라 라인 번호 결정
+	std::string line;
+	int currentLine = 0;
 
-	if (outFile.is_open()) { // 파일이 정상적으로 열렸는지 확인
-		outFile << Ccore::GetInst()->PlayerInfo.PlayerName << std::endl; // 플레이어 이름 저장
-		outFile << Ccore::GetInst()->PlayerInfo.Level << std::endl;      // 레벨 저장
-		outFile << Ccore::GetInst()->PlayerInfo.CurStage << std::endl;   // 스테이지 저장
-		outFile.close(); // 파일 닫기
-		std::cout << "Game saved successfully." << std::endl;
+	// 임시 파일에 데이터 복사 및 수정
+	std::ofstream tempFile("temp.txt");
+	if (!tempFile.is_open()) {
+		std::cerr << "임시 파일을 생성할 수 없습니다.\n";
+		file.close();
+		return;
 	}
-	else 
-	{
-		std::cerr << "Unable to open file for writing" << std::endl; // 파일 열기 실패 시 에러 메시지 출력
-	}	
+
+	while (std::getline(file, line)) {
+		if (currentLine == lineNumber + 4) {
+			tempFile << lineNumber << "% " << CurData << "\n";  
+			// 현재 데이터를 해당 라인에 저장
+		}
+		else {
+			tempFile << line << "\n";  // 기존의 다른 라인은 그대로 유지
+		}
+		currentLine++;
+	}
+	// 파일 정리
+	file.close();
+	tempFile.close();
+	// 원본 파일을 덮어쓰기
+	if (std::remove("PlayerData.txt") != 0) {
+		std::cerr << "원본 파일을 삭제하는 중 오류가 발생했습니다.\n";
+		return;
+	}
+	if (std::rename("temp.txt", "PlayerData.txt") != 0) {
+		std::cerr << "임시 파일을 원본 파일로 이름 변경하는 중 오류가 발생했습니다.\n";
+	}
+	std::cout << "데이터가 저장되었습니다 (슬롯: " << lineNumber << ").\n";
 }
-void Ccore::LoadGame()
+void Ccore::SelectSavePoint()
 {
-	std::ifstream inFile("savegame.txt");
-	if (inFile.is_open())
-	{
-		std::getline(inFile, Ccore::GetInst()->PlayerInfo.PlayerName);
-		inFile >> Ccore::GetInst()->PlayerInfo.Level;
-		inFile >> Ccore::GetInst()->PlayerInfo.CurStage;
-		inFile.close();
+	std::cout << std::endl << "몇번 폴더에 저장 하시겠습니까?" << std::endl;
+	std::cout << std::endl << "1~8번 파일에 저장하세요" << std::endl;
+	std::cout << "0번 파일 = 빠른저장파일" << std::endl;
+	DataFileSave(intToPds(CinAuto()+1));
+}
+PlayerDataSet Ccore::intToPds(int data)
+{
+		if (data < 1 || data > static_cast<int>(PlayerDataSet::End)) {
+			throw std::out_of_range("Invalid");
+			return PlayerDataSet::End;
+		}
+		return static_cast<PlayerDataSet>(data);
+}
+int Ccore::CinAuto() {
+	int choice;
+	while (true) {
+		std::cout << "숫자를 입력하세요: ";
+		std::cin >> choice;
+		if (std::cin.fail()) {
+			// 잘못된 입력이 발생했을 경우
+			std::cin.clear(); // cin의 오류 상태 플래그를 초기화
+			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // 입력 버퍼를 비웁니다.
+			std::cout << "잘못된 입력입니다.\n";
+		}
+		else 
+		{
+			// 유효한 입력이 들어왔을 경우
+			return choice; // 정상적인 경우 반복 종료 후 값 반환
+		}
 	}
-	else
-	{
-		std::cerr << "Unable to open file for reading" << std::endl;
-	}
+}
+string Ccore::PlayInfoToSting()
+{
+	return PlayerInfo.PlayerName
+	+ ", " + std::to_string(PlayerInfo.Level)
+	+ ", " + std::to_string(PlayerInfo.Power)
+	+ ", " + std::to_string(PlayerInfo.Defense)
+	+ ", " + std::to_string(PlayerInfo.Health)
+	+ ", " + std::to_string(PlayerInfo.Exp)
+	+ ", " + std::to_string(PlayerInfo.Money)
+	+ ", " + std::to_string(PlayerInfo.CurStage);
 }
 void Ccore::GameStartSet()
 {
@@ -228,6 +282,7 @@ void Ccore::GameStartSet()
 		{
 		case 1:
 			std::cout << "게임을 시작합니다." << std::endl;
+			P_DataInit();
 			End = false;
 			
 			break;
@@ -251,6 +306,45 @@ void Ccore::GameStartSet()
 			break;
 		}
 	}
+}
+void Ccore::LodingData(PlayerDataSet data)
+{
+	std::ifstream inputFile("PlayerData.txt");
+	std::string line;
+	std::string check = std::to_string(static_cast<int>(data));
+
+	if (!inputFile.is_open()) {
+		std::cerr << "파일을 열 수 없습니다." << std::endl;
+		return;
+	}
+	while (std::getline(inputFile, line)) {
+		if (line.empty() || line[0] == '#'|| line[0] != check[0]) continue;
+		// 주석, 맞지 않는 값 무시
+
+		std::istringstream ss(line);  // 읽어온 줄을 스트림으로 변환
+		std::string token;
+		getline(ss, token, '%'); getline(ss, PlayerInfo.PlayerName, ','); // 이름 읽기
+		getline(ss, token, ','); PlayerInfo.Level = stoi(token)  ;  // 레벨 읽기
+		getline(ss, token, ','); PlayerInfo.Power = stoi(token)  ;	// 힘 읽기
+		getline(ss, token, ','); PlayerInfo.Defense = stoi(token); // 방어력 읽기
+		getline(ss, token, ','); PlayerInfo.Health = stoi(token) ;	// 체력 읽기
+		getline(ss, token, ','); PlayerInfo.Exp = std::stoi(token);  // 경험치 읽기
+		getline(ss, token, ','); PlayerInfo.Money = std::stoi(token);  // 돈 읽기
+		getline(ss, token, ','); PlayerInfo.CurStage = std::stoi(token);  // 진행도 읽기
+	}
+	inputFile.close();
+}
+void Ccore::SaveDataLoding()
+{
+	if (/*저장된 데이터가 없을경우*/)
+	{
+		std::cout << "저장된 플레이어 데이터가 없습니다." << std::endl;
+	}
+	std::cout << "저장된 플레이어 정보 입니다." << std::endl;
+	SaveDataView();
+}
+void Ccore::SaveDataView(PlayerDataSet data)
+{
 }
 Ccore::Ccore()
 	:PlayerInfo{}

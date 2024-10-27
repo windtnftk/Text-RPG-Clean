@@ -12,7 +12,6 @@ int main()
 
     std::locale::global(std::locale(""));
     std::wcout.imbue(std::locale());
-    Ccore::GetInst()->P_DataInit();
     Ccore::GetInst()->GameStartSet();
     Ccore::GetInst()->Init();
     while(GameOff)

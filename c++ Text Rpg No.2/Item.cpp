@@ -61,7 +61,7 @@ void MainItem::ItemInit()
 	//	ItemMMOR NewItem = { static_cast<ItemId>(rendom),ItemArr[rendom] };
 	//	ItemBag.push_back(NewItem);
 	//}
-	
+
 	AddItem(ItemId::Weapon1);
 	AddItem(ItemId::Equipment1);
 	AddItem(ItemId::HealthPortion);
@@ -100,10 +100,10 @@ void MainItem::UseItemManuOpen()
 {
 	OpenItemBag();
 	// 아이템 을 고르고 사용을 할지 정하자
-	int choice =0;
+	int choice = 0;
 	std::cout << std::endl << "사용하실 아이템을 고르세요" << std::endl;
 	std::cin >> choice;
-	if (0 == choice || choice > ItemBag.size() || std::cin.fail() )
+	if (0 == choice || choice > ItemBag.size() || std::cin.fail())
 	{
 		std::cin.clear();
 		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -111,16 +111,16 @@ void MainItem::UseItemManuOpen()
 		return;
 	}
 	//erase 함수 호출해서 적용해야하니까 iterator 반환값 남기자
-		handleItem = ItemBag.begin();
-		for (int i = 0; i < choice; ++i)
-		{
-			++handleItem;
-		}
-		UseItem();
+	handleItem = ItemBag.begin();
+	for (int i = 0; i < choice; ++i)
+	{
+		++handleItem;
+	}
+	UseItem();
 }
 void MainItem::UseItem()
 {
-	
+
 	if (handleItem->CurItemId <= ItemId::BigFirePortion)
 	{
 	}
@@ -140,12 +140,15 @@ void MainItem::UseItem()
 
 void MainItem::UseItem(ItemId Item)
 {
-	if(Item <= ItemId::BigFirePortion)
-	{ }
-	else if(Item <= ItemId::Weapon10)
-	{ }
-	else if(Item <= ItemId::Equipment10)
-	{ }
+	if (Item <= ItemId::BigFirePortion)
+	{
+	}
+	else if (Item <= ItemId::Weapon10)
+	{
+	}
+	else if (Item <= ItemId::Equipment10)
+	{
+	}
 	else
 	{
 		ErrorCode();
@@ -166,7 +169,7 @@ void MainItem::AddItem(ItemId item)
 	{
 		ItemMMOR test = { item, ItemArr[static_cast<int>(item)] };
 		ItemBag.emplace_back(test);
-}
+	}
 	else
 	{
 		std::cout << "잘못된 아이템 아이디입니다." << std::endl;

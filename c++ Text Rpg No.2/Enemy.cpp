@@ -5,7 +5,7 @@
 #include <random>
 
 void EneMy::EnemyInit()
-{	
+{
 	/*
 	std::random_device rd;
 	std::mt19937 gen(rd()); // Mersenne Twister 알고리즘을 사용하는 엔진 생성
@@ -14,21 +14,21 @@ void EneMy::EnemyInit()
 	std::uniform_int_distribution<int> distribution(0, 99);
 	int rendom = distribution(gen) % 10;
 	*/
-	
+
 	EneMy::GetInst()->CreateEnemy(Ccore::GetInst()->ModeCur);
-	
+
 	EneMy::GetInst()->E_Point = EneMy::GetInst()->E_BasicInfo.begin();
 }
 void EneMy::printEnemyBaseInfo(EnemyId data)
 {
 	auto it = EneMy::GetInst()->E_BasicInfo.find(data);
-	std::cout << "Name: " <<   it->second.E_BInfo.C_Name << std::endl;
-	std::cout << "Level: " <<  it->second.E_BInfo.C_Level << std::endl;
-	std::cout << "Power: " <<  it->second.E_BInfo.C_Power << std::endl;
+	std::cout << "Name: " << it->second.E_BInfo.C_Name << std::endl;
+	std::cout << "Level: " << it->second.E_BInfo.C_Level << std::endl;
+	std::cout << "Power: " << it->second.E_BInfo.C_Power << std::endl;
 	std::cout << "Health: " << it->second.E_BInfo.C_Health << std::endl;
-	std::cout << "Exp: "	<< it->second.E_BInfo.C_Exp << std::endl;
-	std::cout << "Place: " <<  it->second.E_Plase << std::endl;
-	std::cout << "Life: " <<  (it->second.E_Life ? "Alive" : "Dead") << std::endl;
+	std::cout << "Exp: " << it->second.E_BInfo.C_Exp << std::endl;
+	std::cout << "Place: " << it->second.E_Plase << std::endl;
+	std::cout << "Life: " << (it->second.E_Life ? "Alive" : "Dead") << std::endl;
 }
 void EneMy::printEnemyCurInfo(EnemyId data)
 {
@@ -53,10 +53,10 @@ void EneMy::SetEnemyInfo()
 }
 void EneMy::ViewEnemy()
 {
-	for (int i = 0; i< (int)EnemyId::God;++i)
+	for (int i = 0; i < (int)EnemyId::God; ++i)
 	{
 		printEnemyBaseInfo(EidReturn(i));
-		
+
 	}
 }
 EnemyId EneMy::EidReturn(int id)
@@ -78,7 +78,7 @@ E_Info* EneMy::IdReturn(EnemyId Id)
 	{
 		return nullptr;
 	}
-	
+
 }
 
 void EneMy::CreateEnemy(GameMode CurMode)
@@ -116,7 +116,7 @@ void EneMy::CreateEnemy(GameMode CurMode)
 }
 
 
-		
+
 
 //void EneMy::CreateEnemy(int	id)
 //{
@@ -192,9 +192,9 @@ EneMy::EneMy()
 	:E_BasicInfo{}
 	, E_Point{}
 {
-	
+
 }
 EneMy::~EneMy()
 {
-	
+
 }

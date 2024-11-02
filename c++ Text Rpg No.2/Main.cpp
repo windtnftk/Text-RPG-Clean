@@ -10,17 +10,17 @@ bool GameOff = true;
 int main()
 {
 
-    std::locale::global(std::locale(""));
-    std::wcout.imbue(std::locale());
-    Ccore::GetInst()->GameStartSet();
-    Ccore::GetInst()->Init();
-    while(GameOff)
-    {
-        
-        Ccore::GetInst()->Progress();
+	std::locale::global(std::locale(""));
+	std::wcout.imbue(std::locale());
+	Ccore::GetInst()->GameStartSet();
+	Ccore::GetInst()->Init();
+	while (GameOff)
+	{
+
+		Ccore::GetInst()->Progress();
 
 
-    }
-   
-    
+	}
+
+
 }

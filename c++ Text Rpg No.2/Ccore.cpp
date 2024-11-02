@@ -357,10 +357,14 @@ bool Ccore::SaveDataLoding()
 	//std::cout << "0번 파일 = 빠른저장파일" << std::endl;
 	//SaveDataView(SaveDataView(convert(CinAuto())));
 	std::cout << "저장된 플레이어 정보 입니다." << std::endl;
-	Selectview();// 선택하고 선택한 데이터 보여주기
-	return true;
+	PlayerData Test = Selectview();
+	if (Test.SaveThis) // 선택하고 선택한 데이터 보여주기
+	{
+		
+	}
+	return false;
 }
-void Ccore::DataFileView(PlayerData data)
+PlayerData Ccore::DataFileView(PlayerData data)
 {
 
 	if (!data.SaveThis)
@@ -373,10 +377,12 @@ void Ccore::DataFileView(PlayerData data)
 		std::cout << "플레이어 경험치 보유량: " << data.Exp << std::endl;
 		std::cout << "플레이어 소지금: " << data.Money << std::endl;
 		std::cout << "플레이어 진행중인 스테이지: " << data.CurStage << std::endl;
+		return data;
 	}
 	else
 	{
 		std::cout << "값을 읽어 오는데 실패했습니다." << std::endl;
+		return data;
 	}
 }
 bool Ccore::CheckSavefile(DataFile dataFile)

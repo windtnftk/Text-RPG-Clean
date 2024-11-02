@@ -88,26 +88,28 @@ public:
 	void	G_DifficultySeting();
 	// Player Name 설정함수
 	void	PlayerNameSeting();
-public:		// 데이터 저장함수
+public:		// 데이터 불러오기
+
+	// 플레이어 이어하기 선택시 데이터 어떤거 가져올지 물어보는 함수
+	bool	SaveDataLoding();
+	// Player Data를 보여주는 함수
+	PlayerData	DataFileView(PlayerData data);
+	// 데이터 입력후 파일을 보여주는 함수(함수종합세트)
+	PlayerData	Selectview() { return DataFileView(LodingData(convert(CinAuto()))); }
+	// PlayD
+public:		// 데이터 저장
 
 	// 데이터 저장전 인테페이스 출력
 	void	SelectSavePoint();
-	// 원하는 데이터 입력값을 보여주는 함수(함수종합세트)
-	void	Selectview() { DataFileView(LodingData(convert(CinAuto()))); }
-	// Player Data를 보여주는 함수
-	void	DataFileView(PlayerData data);
-
-public:		// 데이터 저장함수
+	// PlayerData을 PlayerInfo에 넣는 함수
+	void	PlayerInfoLoding(PlayerData data) { PlayerInfo = data; }
 	// PlayerInfo 를 DataFile에 저장하는 함수
 	void	DataFileSave(DataFile Data);
 	// PlayerInfo를 CruData 에 저장하는 함수, 빠른저장
 	void	CurDataSave() { DataFileSave(DataFile::CurData); }
-	// DataFile을 PlayerInfo에 넣는 함수
-	void	PlayerInfoLoding(PlayerData data) { PlayerInfo = data; }
 
 public:
-	// 플레이어 이어하기 선택시 데이터 어떤거 가져올지 물어보는 함수
-	bool	SaveDataLoding();
+
 	// PlayerInfo를 string으로 변환해서 반환하는 함수
 	string  PlayInfoToSting();
 	// 반환값으로 입력의 int값 받는 함수
@@ -117,10 +119,12 @@ public:
 
 public:
 
+	// 오류 및 저장한파일이 없는지 확인 함수, 있으면 있다고 알려줌
+	// CheckSavefile 을 반복문 돌림
+	bool	AllFileCheck();
 	// DataFile 확인해서 해당 File이 오류가 있는지 확인하는 함수
 	bool	CheckSavefile(DataFile dataFile);
-	// 저장되어있는 데이터가 있는지 확인하는 함수, 있으면 있다고 알려줌
-	bool	AllFileCheck();
+	
 
 public:
 	// int를 Static_cast로 DataFile로 변환하는 함수

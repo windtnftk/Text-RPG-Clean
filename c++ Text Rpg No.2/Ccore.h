@@ -11,7 +11,7 @@ enum class GameMode
 
 	End = 10
 };
-enum class PlayerDataSet
+enum class DataFile
 {
 	BasicData,
 	CurData,
@@ -55,12 +55,16 @@ public:
 	void	Progress();
 	// main 시작부 -> 플레이어 이름 정하기 및 기본 시작창 열기
 	void	GameStartSet();
-	// 플레이어 진행사항 정보 가져오는 함수
-	void	LodingData(PlayerDataSet data);
+	// DataFile을 PlayerData로 반환하는 함수
+	PlayerData	LodingData(DataFile dataFile);
+	// DataFile을 PlayerInfo에 넣는 함수
+	void	PlayerInfoLoding(PlayerData data) { PlayerInfo = data; }
 	// 플레이어 이어하기 선택시 데이터 어떤거 가져올지 물어보는 함수
 	void	SaveDataLoding();
-	// 플레이어 데이터저장 한걸 보여주는 함수 <== 진행예정 (24.10.27)
-	void	SaveDataView(PlayerDataSet data);
+	// Player Data를 보여주는 함수 <== 진행예정 (24.10.27)
+	void	DataFileView(PlayerData data);
+	// 원하는 데이터 입력값을 보여주는 함수(함수종합세트)
+	void	Selectview(){ DataFileView(LodingData(intToDfile(CinAuto()))); }
 	// Game Over 되는 함수
 	void	GameOver() { GameOff = false; };
 	// Game StartSet 중 메뉴 출력
@@ -73,12 +77,14 @@ public:
 	void	PlayerNameSeting();
 	// 데이터 저장전 인테페이스 출력
 	void	SelectSavePoint();
-	// int 인자를 PlayerDataSet으로 변경함수
-	PlayerDataSet intToPds(int data);
-	// PlayerInfo 를 PlayerDataSet에 저장하는 함수
-	void	DataFileSave(PlayerDataSet Data);
+	// int 인자를 DataFile로 변경함수
+	DataFile intToDfile(int data);
+	// int 인자를 PlayerData으로 변경함수
+	//PlayerData intToPd(int data);
+	// PlayerInfo 를 DataFile에 저장하는 함수
+	void	DataFileSave(DataFile Data);
 	// PlayerInfo를 CruData 에 저장하는 함수, 빠른저장
-	void	CurDataSave() { DataFileSave(PlayerDataSet::CurData); }
+	void	CurDataSave() { DataFileSave(DataFile::CurData); }
 	// PlayerInfo를 string으로 변환해서 반환하는 함수
 	string  PlayInfoToSting();
 	// 반환값으로 입력의 int값 받는 함수

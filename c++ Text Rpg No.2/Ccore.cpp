@@ -18,7 +18,7 @@ void Ccore::Init()
 
 void Ccore::P_DataInit()
 {
-	LodingData(PlayerDataSet::BasicData);
+	LodingData(DataFile::BasicData);
 }
 void Ccore::BattleStartInit()
 {
@@ -173,15 +173,15 @@ void Ccore::PlayerNameSeting()
 	}
 	Ccore::GetInst()->PlayerInfo.PlayerName = NewName;
 }
-void Ccore::DataFileSave(PlayerDataSet Data)
+void Ccore::DataFileSave(DataFile Data)
 {	
-	if (Data == PlayerDataSet::End || Data == PlayerDataSet::BasicData)
+	if (Data == DataFile::End || Data == DataFile::BasicData)
 	{
 		std::cout << "잘못된 데이터 파일입니다." << std::endl;
 	}
 	std::fstream file("PlayerData.txt", std::ios::in | std::ios::out);
 	
-	if (!file.is_open() || Data == PlayerDataSet::BasicData) {
+	if (!file.is_open() || Data == DataFile::BasicData) {
 		std::cerr << "파일을 열 수 없습니다.\n";
 		return;
 	}
@@ -227,15 +227,15 @@ void Ccore::SelectSavePoint()
 	std::cout << std::endl << "몇번 폴더에 저장 하시겠습니까?" << std::endl;
 	std::cout << std::endl << "1~8번 파일에 저장하세요" << std::endl;
 	std::cout << "0번 파일 = 빠른저장파일" << std::endl;
-	DataFileSave(intToPds(CinAuto()+1));
+	DataFileSave(intToDfile(CinAuto()+1));
 }
-PlayerDataSet Ccore::intToPds(int data)
+DataFile Ccore::intToDfile(int data)
 {
-		if (data < 1 || data > static_cast<int>(PlayerDataSet::End)) {
+		if (data < 1 || data > static_cast<int>(DataFile::End)) {
 			throw std::out_of_range("Invalid");
-			return PlayerDataSet::End;
+			return DataFile::End;
 		}
-		return static_cast<PlayerDataSet>(data);
+		return static_cast<DataFile>(data);
 }
 int Ccore::CinAuto() {
 	int choice;
@@ -307,12 +307,12 @@ void Ccore::GameStartSet()
 		}
 	}
 }
-void Ccore::LodingData(PlayerDataSet data)
+PlayerData Ccore::LodingData(DataFile dataFile)
 {
 	std::ifstream inputFile("PlayerData.txt");
 	std::string line;
-	std::string check = std::to_string(static_cast<int>(data));
-
+	std::string check = std::to_string(static_cast<int>(dataFile));
+	PlayerData Data;
 	if (!inputFile.is_open()) {
 		std::cerr << "파일을 열 수 없습니다." << std::endl;
 		return;
@@ -322,29 +322,46 @@ void Ccore::LodingData(PlayerDataSet data)
 		// 주석, 맞지 않는 값 무시
 
 		std::istringstream ss(line);  // 읽어온 줄을 스트림으로 변환
-		std::string token;
-		getline(ss, token, '%'); getline(ss, PlayerInfo.PlayerName, ','); // 이름 읽기
-		getline(ss, token, ','); PlayerInfo.Level = stoi(token)  ;  // 레벨 읽기
-		getline(ss, token, ','); PlayerInfo.Power = stoi(token)  ;	// 힘 읽기
-		getline(ss, token, ','); PlayerInfo.Defense = stoi(token); // 방어력 읽기
-		getline(ss, token, ','); PlayerInfo.Health = stoi(token) ;	// 체력 읽기
-		getline(ss, token, ','); PlayerInfo.Exp = std::stoi(token);  // 경험치 읽기
-		getline(ss, token, ','); PlayerInfo.Money = std::stoi(token);  // 돈 읽기
-		getline(ss, token, ','); PlayerInfo.CurStage = std::stoi(token);  // 진행도 읽기
+		std::string token; 
+		getline(ss, token, '%'); getline(ss, Data.PlayerName, ','); // 이름 읽기
+		getline(ss, token, ','); Data.Level = stoi(token)  ;  // 레벨 읽기
+		getline(ss, token, ','); Data.Power = stoi(token)  ;	// 힘 읽기
+		getline(ss, token, ','); Data.Defense = stoi(token); // 방어력 읽기
+		getline(ss, token, ','); Data.Health = stoi(token) ;	// 체력 읽기
+		getline(ss, token, ','); Data.Exp = std::stoi(token);  // 경험치 읽기
+		getline(ss, token, ','); Data.Money = std::stoi(token);  // 돈 읽기
+		getline(ss, token, ','); Data.CurStage = std::stoi(token);  // 진행도 읽기
 	}
 	inputFile.close();
+	return Data;
 }
+// 읽고 그에 대한 데이터를 PlayerInfo에 저장할 함수
+// 읽고 그에 대한 데이터를 
+// 읽고 그에 대한 데이터를 view만 할 함수
 void Ccore::SaveDataLoding()
 {
-	if (/*저장된 데이터가 없을경우*/)
+	if (false/*저장된 데이터가 없을경우*/)
 	{
 		std::cout << "저장된 플레이어 데이터가 없습니다." << std::endl;
 	}
+	std::cout << "어떤 데이터를 가져올까요?" << std::endl;
+	std::cout << std::endl << "몇번 폴더를 로딩하시겠습니까?" << std::endl;
+	std::cout << std::endl << "1~8번 파일중 선택하세요" << std::endl;
+	//std::cout << "0번 파일 = 빠른저장파일" << std::endl;
+	//SaveDataView(SaveDataView(intToDfile(CinAuto())));
+	Selectview();// 선택한 데이터 보여주기
 	std::cout << "저장된 플레이어 정보 입니다." << std::endl;
-	SaveDataView();
 }
-void Ccore::SaveDataView(PlayerDataSet data)
+void Ccore::DataFileView(PlayerData data)
 {
+	std::cout << "플레이어 이름: " << data.PlayerName << std::endl;
+	std::cout << "플레이어 레벨: " << data.Level	  << std::endl;  
+	std::cout << "플레이어 힘: " << data.Power	  << std::endl;  
+	std::cout << "플레이어 방어력: " << data.Defense    << std::endl;
+	std::cout << "플레이어 체력: " << data.Health	  << std::endl;  
+	std::cout << "플레이어 경험치 보유량: " << data.Exp	      << std::endl;
+	std::cout << "플레이어 소지금: " << data.Money	  << std::endl;  
+	std::cout << "플레이어 진행중인 스테이지: " << data.CurStage   << std::endl;
 }
 Ccore::Ccore()
 	:PlayerInfo{}

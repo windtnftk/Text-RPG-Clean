@@ -4,6 +4,19 @@
 #include "Enemy.h"
 #include "Equipment.h"
 
+void Ccore::Progress()
+{
+	if (!GameOff)// 도는중에 gameOff가 작동하면 바로 끝내도록 함
+	{
+		return;
+	}
+	//EneMy::GetInst()->ViewEnemy();
+	//MainItem::GetInst()->OpenItemBag();
+	//SelectSavePoint();
+	//SaveDataLoding();
+	//CurDataSave();
+	BattleStartInit();
+}
 void Ccore::Init()
 {
 	if (ModeCur != GameMode::GameEnd)
@@ -11,54 +24,48 @@ void Ccore::Init()
 		Ccore::MaxDataInit();
 		MainItem::GetInst()->ItemInit();
 		EneMy::GetInst()->EnemyInit();
-		EneMy::GetInst()->ViewEnemy();
+		//EneMy::GetInst()->ViewEnemy();
 	}
-
 }
 void Ccore::MaxDataInit()
 {
 	MaxDataInfo = PlayerInfo;
-	MaxDataInfo.Exp = PlayerInfo.Level *20;
+	MaxDataInfo.Exp = PlayerInfo.Level * 20;
 }
-void Ccore::BattleStartInit()
+
+void Ccore::GameStartSet()
 {
-	while (true)
+	bool End = true;
+	while (End)
 	{
-		bool End = true;
-		while (End)
+		GameStartSetOutPut();
+		switch (CinAuto())
 		{
-			EneMy::GetInst()->SetEnemyInfo();
-			std::cout << "[1.일반공격]" << " [2.아이템사용] " << "[3.상태창]" << std::endl << std::endl;
-			switch (CinAuto())
-			{
-			case 1:
+		case 1:
+			std::cout << "게임을 시작합니다." << std::endl;
+			P_DataInit();
+			End = false;
 
-				End = false;
-				break;
-			case 2:
-
-
-				break;
-			case 3:
-
-
-				break;
-			default:
-				ErrorCode();
-				break;
-			}
+			break;
+		case 2:
+			std::cout << "게임을 이어합니다." << std::endl;
+			End = !SaveDataLoding();
+			break;
+		case 3:
+			std::cout << "설정을 변경합니다." << std::endl;
+			// 설정창 열기 진행 예정
+			G_M_Set();
+			break;
+		case 4:
+			GameOver();
+			ModeCur = GameMode::GameEnd;
+			End = false;
+			break;
+		default:
+			ErrorCode();
+			break;
 		}
 	}
-}
-
-
-void Ccore::Progress()
-{
-	EneMy::GetInst()->ViewEnemy();
-	//MainItem::GetInst()->OpenItemBag();
-	SelectSavePoint();
-	SaveDataLoding();
-	//CurDataSave();
 }
 void Ccore::GameStartSetOutPut()
 {
@@ -177,6 +184,104 @@ void Ccore::PlayerNameSeting()
 	}
 	Ccore::GetInst()->PlayerInfo.PlayerName = NewName;
 }
+void Ccore::BattleStartInit()
+{
+	E_Info test = EneMy::GetInst()->SetEnemyInfo();
+	// 적 또는 플레이어가 사망해야 반복문이 끝남
+	// 적의 체력이 다 떨어지면 자동으로 반복문 off
+	while (EneMy::GetInst()->printCurInfo(test))
+	{
+		// 플레이어 턴
+		bool End = true;
+		while (End)
+		{
+
+			std::cout << std::endl << "[1.일반공격]" << " [2.아이템사용] " << "[3.상태창]" << std::endl << std::endl;
+			switch (CinAuto())
+			{
+			case 1:
+				test = Hitdamage(test);
+				End = false;
+				break;
+			case 2:
+				MainItem::GetInst()->UseItemManuOpen();
+				//UseItem 함수 제작중, 적을 공격 및 적의 공격 먼저 만들자 <== 24.11.03
+
+				break;
+			case 3:
+				PlayerInfoView();
+				break;
+			default:
+				ErrorCode();
+				break;
+			}
+		}
+		if (!EnemyTurn(test))
+		{
+			GameOver();
+			return;
+		};
+	}
+}
+void Ccore::PlayerInfoView()
+{
+	std::cout << "이름: " << PlayerInfo.PlayerName << std::endl;
+	std::cout << "레벨: " << PlayerInfo.Level << std::endl;
+	std::cout << "공격력: " << PlayerInfo.Power << std::endl;
+	std::cout << "방어력: " << PlayerInfo.Defense << std::endl;
+	std::cout << "체력: " << PlayerInfo.Health << std::endl;
+	std::cout << "현재 경험치: " << PlayerInfo.Exp << std::endl;
+	std::cout << "필요 경험치: " << MaxDataInfo.Exp - PlayerInfo.Exp << std::endl;
+}
+E_Info Ccore::Hitdamage(E_Info Enemy)
+{
+	if (Enemy.E_BInfo.C_Health > 0) // 적이 살아야 내가 공격함
+	{
+		std::cout << PlayerInfo.Power << "의 피해를 입혔습니다." << std::endl;
+		Enemy.E_BInfo.C_Health = Enemy.E_BInfo.C_Health - PlayerInfo.Power;
+	}
+	return Enemy;
+}
+bool Ccore::EnemyTurn(E_Info Enemy)
+{
+
+	EnemyAttack(Enemy);
+
+	if (!PlayerLifeCheck)
+	{
+		std::cout << "플레이어가 죽었습니다." << std::endl;
+		return false;
+	}
+	return true;
+
+}
+void Ccore::EnemyAttack(E_Info Enemy)
+{
+	if (Enemy.E_BInfo.C_Health > 0) // 적이 살아야 적이 공격함
+	{
+		std::cout << Enemy.E_BInfo.C_Power << "의 피해를 입었습니다." << std::endl;
+		PlayerInfo.Health = PlayerInfo.Health - Enemy.E_BInfo.C_Power;
+	}
+}
+bool Ccore::PlayerLifeCheck()
+{
+	if (PlayerInfo.Health < 0)
+	{
+		return false;
+	}
+	return true;
+}
+void Ccore::SelectSavePoint()
+{
+	if (!AllFileCheck())
+	{
+		std::cout << "저장된 플레이어 데이터가 없습니다." << std::endl;
+	}
+	std::cout << std::endl << "몇번 폴더에 저장 하시겠습니까?" << std::endl;
+	std::cout << std::endl << "1~8번 파일에 저장하세요" << std::endl;
+	std::cout << "0번 파일 = 빠른저장파일" << std::endl;
+	DataFileSave(convert(CinAuto()));
+}
 void Ccore::DataFileSave(DataFile Data)
 {
 	if (Data == DataFile::End || Data == DataFile::BasicData)
@@ -226,25 +331,69 @@ void Ccore::DataFileSave(DataFile Data)
 	}
 	std::cout << "데이터가 저장되었습니다 (슬롯: " << lineNumber << ").\n";
 }
-void Ccore::SelectSavePoint()
+bool Ccore::SaveDataLoding()
 {
 	if (!AllFileCheck())
 	{
 		std::cout << "저장된 플레이어 데이터가 없습니다." << std::endl;
+		return false;
 	}
-	std::cout << std::endl << "몇번 폴더에 저장 하시겠습니까?" << std::endl;
-	std::cout << std::endl << "1~8번 파일에 저장하세요" << std::endl;
-	std::cout << "0번 파일 = 빠른저장파일" << std::endl;
-	DataFileSave(convert(CinAuto() + 1));
+	std::cout << std::endl << "몇번 폴더를 로딩하시겠습니까?" << std::endl;
+	std::cout << std::endl << "1~8번 파일중 선택하세요" << std::endl;
+	//std::cout << "0번 파일 = 빠른저장파일" << std::endl;
+	//SaveDataView(SaveDataView(convert(CinAuto())));
+	std::cout << "저장된 플레이어 정보 입니다." << std::endl;
+	PlayerData Test = Selectview();
+	if (Test.SaveThis) // 선택하고 선택한 데이터 보여주기
+	{
+		string boolinput;
+		while (true)
+		{
+			std::cout << "이 로딩파일로 이어하시겠습니까?" << std::endl;
+			std::cout << "yes 또는 no를 입력해주십시오" << std::endl;
+			std::cin >> boolinput;
+			for (char& c : boolinput)
+			{
+				c = std::tolower(c);
+			}
+			if ("yes" == boolinput)
+			{
+				PlayerInfoLoding(Test);
+				return true;
+			}
+			else if ("no" == boolinput)
+			{
+				return false;
+			}
+			else
+			{
+				ErrorCode();
+			}
+		}
+	}
+	return false;
 }
-//DataFile Ccore::intToDfile(int data)
-//{
-//	if (data < 1 || data > convert(DataFile::End)) {
-//		throw std::out_of_range("Invalid");
-//		return DataFile::End;
-//	}
-//	return convert(data);
-//}
+PlayerData Ccore::DataFileView(PlayerData data)
+{
+
+	if (data.SaveThis)
+	{
+		std::cout << "플레이어 이름: " << data.PlayerName << std::endl;
+		std::cout << "플레이어 레벨: " << data.Level << std::endl;
+		std::cout << "플레이어 힘: " << data.Power << std::endl;
+		std::cout << "플레이어 방어력: " << data.Defense << std::endl;
+		std::cout << "플레이어 체력: " << data.Health << std::endl;
+		std::cout << "플레이어 경험치 보유량: " << data.Exp << std::endl;
+		std::cout << "플레이어 소지금: " << data.Money << std::endl;
+		std::cout << "플레이어 진행중인 스테이지: " << data.CurStage << std::endl;
+		return data;
+	}
+	else
+	{
+		std::cout << "값을 읽어 오는데 실패했습니다." << std::endl;
+		return data;
+	}
+}
 int Ccore::CinAuto() {
 	int choice;
 	while (true) {
@@ -259,6 +408,7 @@ int Ccore::CinAuto() {
 		else
 		{
 			// 유효한 입력이 들어왔을 경우
+			std::cout << std::endl;
 			return choice; // 정상적인 경우 반복 종료 후 값 반환
 		}
 	}
@@ -274,46 +424,6 @@ string Ccore::PlayInfoToSting()
 		+ ", " + std::to_string(PlayerInfo.Money)
 		+ ", " + std::to_string(PlayerInfo.CurStage)
 		+ "$ " + std::to_string(1) + "!";
-}
-void Ccore::GameStartSet()
-{
-	bool End = true;
-	while (End)
-	{
-		std::cout << "1. 게임 시작" << std::endl;
-		std::cout << "2. 게임 이어하기" << std::endl;
-		std::cout << "3. 설정 변경하기" << std::endl;
-		std::cout << "4. 게임 종료하기" << std::endl;
-		int input = 0;
-		std::cin >> input;
-		// 이름 가져오는거 진행 ㄱ~~~
-		switch (input)
-		{
-		case 1:
-			std::cout << "게임을 시작합니다." << std::endl;
-			P_DataInit();
-			End = false;
-
-			break;
-		case 2:
-			std::cout << "게임을 이어합니다." << std::endl;
-			End = !SaveDataLoding();
-			break;
-		case 3:
-			std::cout << "설정을 변경합니다." << std::endl;
-			// 설정창 열기 진행 예정
-			G_M_Set();
-			break;
-		case 4:
-			GameOver();
-			ModeCur = GameMode::GameEnd;
-			End = false;
-			break;
-		default:
-			ErrorCode();
-			break;
-		}
-	}
 }
 PlayerData Ccore::LodingData(DataFile dataFile)
 {
@@ -345,45 +455,23 @@ PlayerData Ccore::LodingData(DataFile dataFile)
 	inputFile.close();
 	return Data;
 }
-bool Ccore::SaveDataLoding()
+bool Ccore::AllFileCheck()
 {
-	if (!AllFileCheck())
+	bool test = 0;
+	for (DataFile i = DataFile::CurData; i < DataFile::BasicData; ++i)
 	{
-		std::cout << "저장된 플레이어 데이터가 없습니다." << std::endl;
-		return false;
+		if (CheckSavefile(i))
+		{
+			if (!test)
+			{
+				std::cout << "저장되어 있는 File" << std::endl;
+				test = 1;
+			}
+			std::cout << "Datafile " << convert(i) << ", ";
+		}
 	}
-	std::cout << std::endl << "몇번 폴더를 로딩하시겠습니까?" << std::endl;
-	std::cout << std::endl << "1~8번 파일중 선택하세요" << std::endl;
-	//std::cout << "0번 파일 = 빠른저장파일" << std::endl;
-	//SaveDataView(SaveDataView(convert(CinAuto())));
-	std::cout << "저장된 플레이어 정보 입니다." << std::endl;
-	PlayerData Test = Selectview();
-	if (Test.SaveThis) // 선택하고 선택한 데이터 보여주기
-	{
-		
-	}
-	return false;
-}
-PlayerData Ccore::DataFileView(PlayerData data)
-{
-
-	if (!data.SaveThis)
-	{
-		std::cout << "플레이어 이름: " << data.PlayerName << std::endl;
-		std::cout << "플레이어 레벨: " << data.Level << std::endl;
-		std::cout << "플레이어 힘: " << data.Power << std::endl;
-		std::cout << "플레이어 방어력: " << data.Defense << std::endl;
-		std::cout << "플레이어 체력: " << data.Health << std::endl;
-		std::cout << "플레이어 경험치 보유량: " << data.Exp << std::endl;
-		std::cout << "플레이어 소지금: " << data.Money << std::endl;
-		std::cout << "플레이어 진행중인 스테이지: " << data.CurStage << std::endl;
-		return data;
-	}
-	else
-	{
-		std::cout << "값을 읽어 오는데 실패했습니다." << std::endl;
-		return data;
-	}
+	std::cout << std::endl;
+	return test;
 }
 bool Ccore::CheckSavefile(DataFile dataFile)
 {
@@ -407,25 +495,6 @@ bool Ccore::CheckSavefile(DataFile dataFile)
 	inputFile.close();
 	return false;
 }
-bool Ccore::AllFileCheck()
-{
-	bool test = 0;
-	for (DataFile i = DataFile::DataFile1; i <= DataFile::DataFile8; ++i)
-	{
-		if (CheckSavefile(i))
-		{
-			if (!test)
-			{
-				std::cout << "저장되어 있는 File" << std::endl;
-				test = 1;
-			}
-			std::cout << "Datafile " << convert(i) << ", ";
-		}
-	}
-	std::cout << std::endl;
-	return test;
-}
-
 Ccore::Ccore()
 	:PlayerInfo{}
 	, ModeCur(GameMode::Normal)

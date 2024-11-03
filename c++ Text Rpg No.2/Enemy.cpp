@@ -19,68 +19,6 @@ void EneMy::EnemyInit()
 
 	EneMy::GetInst()->E_Point = EneMy::GetInst()->E_BasicInfo.begin();
 }
-void EneMy::printEnemyBaseInfo(EnemyId data)
-{
-	auto it = EneMy::GetInst()->E_BasicInfo.find(data);
-	std::cout << "Name: " << it->second.E_BInfo.C_Name << std::endl;
-	std::cout << "Level: " << it->second.E_BInfo.C_Level << std::endl;
-	std::cout << "Power: " << it->second.E_BInfo.C_Power << std::endl;
-	std::cout << "Health: " << it->second.E_BInfo.C_Health << std::endl;
-	std::cout << "Exp: " << it->second.E_BInfo.C_Exp << std::endl;
-	std::cout << "Place: " << it->second.E_Plase << std::endl;
-	std::cout << "Life: " << (it->second.E_Life ? "Alive" : "Dead") << std::endl;
-}
-void EneMy::printEnemyCurInfo(EnemyId data)
-{
-	auto it = EneMy::GetInst()->E_BasicInfo.find(data);
-	std::cout << "Name: " << it->second.E_CurInfo.C_Name << std::endl;
-	std::cout << "Level: " << it->second.E_CurInfo.C_Level << std::endl;
-	std::cout << "Power: " << it->second.E_CurInfo.C_Power << std::endl;
-	std::cout << "Health: " << it->second.E_CurInfo.C_Health << std::endl;
-	std::cout << "Exp: " << it->second.E_CurInfo.C_Exp << std::endl;
-	std::cout << "Place: " << it->second.E_Plase << std::endl;
-	std::cout << "Life: " << (it->second.E_Life ? "Alive" : "Dead") << std::endl;
-}
-void EneMy::SetEnemyInfo()
-{
-	std::cout << "Name: " << E_Point->second.E_CurInfo.C_Name << std::endl;
-	std::cout << "Level: " << E_Point->second.E_CurInfo.C_Level << std::endl;
-	std::cout << "Power: " << E_Point->second.E_CurInfo.C_Power << std::endl;
-	std::cout << "Health: " << E_Point->second.E_CurInfo.C_Health << std::endl;
-	std::cout << "Exp: " << E_Point->second.E_CurInfo.C_Exp << std::endl;
-	std::cout << "Place: " << E_Point->second.E_Plase << std::endl;
-	std::cout << "Life: " << (E_Point->second.E_Life ? "Alive" : "Dead") << std::endl;
-}
-void EneMy::ViewEnemy()
-{
-	for (int i = 0; i < (int)EnemyId::God; ++i)
-	{
-		printEnemyBaseInfo(EidReturn(i));
-
-	}
-}
-EnemyId EneMy::EidReturn(int id)
-{
-	if (id < 0 || id > static_cast<int>(EnemyId::God)) {
-		throw std::out_of_range("Invalid EnemyId");
-	}
-	return static_cast<EnemyId>(id);
-}
-
-E_Info* EneMy::IdReturn(EnemyId Id)
-{
-	map<EnemyId, E_Info>::iterator It = E_BasicInfo.find(Id);
-	if (It != E_BasicInfo.end())
-	{
-		return &It->second;
-	}
-	else
-	{
-		return nullptr;
-	}
-
-}
-
 void EneMy::CreateEnemy(GameMode CurMode)
 {
 	if (GameMode::GameEnd == CurMode)
@@ -107,17 +45,90 @@ void EneMy::CreateEnemy(GameMode CurMode)
 		getline(ss, token, ','); monster.E_BInfo.C_Exp = stoi(token) * (int)CurMode;	// 경험치 읽기
 		getline(ss, token, ','); monster.E_Plase = std::stoi(token);  // 생존 위치 읽기
 		getline(ss, token, ','); monster.E_Life = std::stoi(token);  // 생존 여부 읽기
-		monster.E_CurInfo = monster.E_BInfo; // 기본 세팅 값 현재값으로 복사
+		//monster.E_CurInfo = monster.E_BInfo; // 기본 세팅 값 현재값으로 복사
 		EneMy::GetInst()->E_BasicInfo.emplace(EidReturn(ID), monster);// 몬스터 정보 저장
 		++ID;
 	}
 
 	inputFile.close();
 }
+E_Info EneMy::SetEnemyInfo()
+{
+	/*std::cout << "Name: " << E_Point->second.E_BInfo.C_Name << std::endl;
+	std::cout << "Level: " << E_Point->second.E_BInfo.C_Level << std::endl;
+	std::cout << "Power: " << E_Point->second.E_BInfo.C_Power << std::endl;
+	std::cout << "Health: " << E_Point->second.E_BInfo.C_Health << std::endl;
+	std::cout << "Exp: " << E_Point->second.E_BInfo.C_Exp << std::endl;
+	std::cout << "Place: " << E_Point->second.E_Plase << std::endl;
+	std::cout << "Life: " << (E_Point->second.E_Life ? "Alive" : "Dead") << std::endl;*/
+	return E_Point->second;
+}
+void EneMy::ViewEnemy()
+{
+	for (int i = 0; i < (int)EnemyId::God; ++i)
+	{
+		printEnemyBaseInfo(EidReturn(i));
 
+	}
+}
+void EneMy::printEnemyBaseInfo(EnemyId data)
+{
+	auto it = EneMy::GetInst()->E_BasicInfo.find(data);
+	std::cout << "Name: " << it->second.E_BInfo.C_Name << std::endl;
+	std::cout << "Level: " << it->second.E_BInfo.C_Level << std::endl;
+	std::cout << "Power: " << it->second.E_BInfo.C_Power << std::endl;
+	std::cout << "Health: " << it->second.E_BInfo.C_Health << std::endl;
+	std::cout << "Exp: " << it->second.E_BInfo.C_Exp << std::endl;
+	std::cout << "Place: " << it->second.E_Plase << std::endl;
+	std::cout << "Life: " << (it->second.E_Life ? "Alive" : "Dead") << std::endl;
+}
+bool EneMy::printCurInfo(E_Info data)
+{
+	std::cout << "Name: " << data.E_BInfo.C_Name << std::endl;
+	std::cout << "Level: " << data.E_BInfo.C_Level << std::endl;
+	std::cout << "Power: " << data.E_BInfo.C_Power << std::endl;
+	std::cout << "Health: " << data.E_BInfo.C_Health << std::endl;
+	std::cout << "Exp: " << data.E_BInfo.C_Exp << std::endl;
+	std::cout << "Place: " << data.E_Plase << std::endl;
+	std::cout << "Life: " << (data.E_Life ? "Alive" : "Dead") << std::endl;
+	if (data.E_BInfo.C_Health > 0)
+	{
+		return true;
+	}
+	return false;
+}
+void EneMy::printEnemyCurInfo(EnemyId data)
+{
+	/*auto it = EneMy::GetInst()->E_BasicInfo.find(data);
+	std::cout << "Name: " << it->second.E_CurInfo.C_Name << std::endl;
+	std::cout << "Level: " << it->second.E_CurInfo.C_Level << std::endl;
+	std::cout << "Power: " << it->second.E_CurInfo.C_Power << std::endl;
+	std::cout << "Health: " << it->second.E_CurInfo.C_Health << std::endl;
+	std::cout << "Exp: " << it->second.E_CurInfo.C_Exp << std::endl;
+	std::cout << "Place: " << it->second.E_Plase << std::endl;
+	std::cout << "Life: " << (it->second.E_Life ? "Alive" : "Dead") << std::endl;*/
+}
+EnemyId EneMy::EidReturn(int id)
+{
+	if (id < 0 || id > static_cast<int>(EnemyId::God)) {
+		throw std::out_of_range("Invalid EnemyId");
+	}
+	return static_cast<EnemyId>(id);
+}
 
+E_Info* EneMy::IdReturn(EnemyId Id)
+{
+	map<EnemyId, E_Info>::iterator It = E_BasicInfo.find(Id);
+	if (It != E_BasicInfo.end())
+	{
+		return &It->second;
+	}
+	else
+	{
+		return nullptr;
+	}
 
-
+}
 //void EneMy::CreateEnemy(int	id)
 //{
 //	EneMy::GetInst()->CreateEnemy(static_cast<EnemyId>(id));

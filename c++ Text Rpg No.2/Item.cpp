@@ -112,7 +112,7 @@ void MainItem::UseItemManuOpen()
 	}
 	//erase 함수 호출해서 적용해야하니까 iterator 반환값 남기자
 	handleItem = ItemBag.begin();
-	for (int i = 0; i < choice; ++i)
+	for (int i = 1; i < choice; ++i)
 	{
 		++handleItem;
 	}

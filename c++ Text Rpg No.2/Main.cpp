@@ -21,6 +21,6 @@ int main()
 
 
 	}
-
+	//Ccore::GetInst()->CurDataSave();
 
 }

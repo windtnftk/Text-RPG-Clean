@@ -9,6 +9,7 @@
 enum class GameMode; // 이런 enum class가 있다고 미리 선언
 enum class EnemyId
 {
+	Enemy0,
 	Enemy1,
 	Enemy2,
 	Enemy3,
@@ -32,7 +33,7 @@ struct B_Status
 struct E_Info
 {
 	B_Status		E_BInfo;//몬스터 기본정보
-	B_Status		E_CurInfo;// 몬스터 현재값
+	//B_Status		E_CurInfo;// 몬스터 현재값
 	int				E_Plase;//몬스터 생존위치
 	bool			E_Life;//몬스터 생존여부
 };
@@ -46,27 +47,41 @@ public:
 	map<EnemyId, E_Info> E_BasicInfo;//적의 모든정보
 	map<EnemyId, E_Info>::iterator	E_Point; //적 세팅
 	
-public:
+public:		// 설정 및 초기화 함수
+
 	// 정보 초기화
 	void EnemyInit();
-	// 원하는 id 값을 Base 정보로 출력해주는 함수
-	void printEnemyBaseInfo(EnemyId data);
-	// 원하는 id 값을 Cur 정보로 출력해주는 함수
-	void printEnemyCurInfo(EnemyId data);
-	// 싸우고 있는 적의 정보로 출력해주는 함수
-	void SetEnemyInfo();
-	// id 값 쓰면 정보 주소값 변환하는 함수
-	E_Info* IdReturn(EnemyId Id);
-	// int 값 쓰면 EnemyId로 바꿔주는 함수
-	EnemyId EidReturn(int id);
 	// 설정한 난이도에 따라 적의 스탯을 변한 시키는 함수
 	//B_Status StatChange(GameMode CurMode, EnemyId id);
 	// 적의 총 사이즈를 변환해주는 함수
 	int CurSize() { return (int)EneMy::GetInst()->E_BasicInfo.size(); };
 	// 설정한 난이도에 따라 적을 생성하는 함수
 	void CreateEnemy(GameMode CurMode);
-	// 적들 정보 순회하는 함수
+
+public:		//적과 전투하는 함수
+
+	// 싸우고 있는 적의 정보로 출력해주는 함수
+	// 반환값을 받아서 실제 적 생성
+	E_Info SetEnemyInfo();
+	// 모든 적들 정보 순회하는 함수
 	void ViewEnemy();
+	
+
+public:		// 각종 변환 함수, 내용출력 함수
+
+	// 원하는 id 값을 Base 정보로 출력해주는 함수
+	void printEnemyBaseInfo(EnemyId data);
+	// E_Info값 받으면 출력하는 함수
+	// 반환값으로 입력된 적의 체력이 없는지 확인
+	bool printCurInfo(E_Info data);
+	// 원하는 id 값을 Cur 정보로 출력해주는 함수
+	// 현재 사용하지 않음
+	void printEnemyCurInfo(EnemyId data);
+	// id 값 쓰면 정보 주소값 변환하는 함수
+	E_Info* IdReturn(EnemyId Id);
+	// int 값 쓰면 EnemyId로 바꿔주는 함수
+	EnemyId EidReturn(int id);
+
 private:
 	//void CreateEnemy( int	id);
 };

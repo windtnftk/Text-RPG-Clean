@@ -262,8 +262,6 @@ E_Check Ccore::BattleStartInit()
 				break;
 			case 2:
 				MainItem::GetInst()->UseItemManuOpen();
-				//UseItem 함수 제작중, 적을 공격 및 적의 공격 먼저 만들자 <== 24.11.03
-				End = false;
 				break;
 			case 3:
 				PlayerInfoView();

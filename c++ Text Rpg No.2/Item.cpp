@@ -78,6 +78,17 @@ void MainItem::HandleItemErase(vector<ItemMMOR>::iterator& ItemId)
 		handleItem = ItemBag.begin();
 	}
 }
+void MainItem::OpenItemBag()
+{
+	vector<ItemMMOR>::iterator BeginhandleItem = ItemBag.begin();
+
+	for (int i = 0; i < ItemBag.size(); ++BeginhandleItem, ++i)
+	{
+		//int GetId = GetInst()->SelectId(BeginhandleItem);
+		string GetName = SelectName(BeginhandleItem);
+		std::cout << i + 1 << ". " << GetName << std::endl;
+	}
+}
 ItemId MainItem::SelectId(const vector<ItemMMOR>::iterator& ItemId)
 {
 	if (ItemId == ItemBag.end())
@@ -96,7 +107,6 @@ string MainItem::SelectName(const vector<ItemMMOR>::iterator& ItemId)
 	ItemMMOR Hi = *ItemId;
 	return (string)Hi.ItemName;
 }
-
 void MainItem::UseItemManuOpen()
 {
 	OpenItemBag();
@@ -110,58 +120,8 @@ void MainItem::UseItemManuOpen()
 		ErrorCode();
 		return;
 	}
-	//erase 함수 호출해서 적용해야하니까 iterator 반환값 남기자
-	handleItem = ItemBag.begin();
-	for (int i = 1; i < choice; ++i)
-	{
-		++handleItem;
-	}
-	UseItem();
+	ItemTypeEffect(convert(choice));
 }
-void MainItem::UseItem()
-{
-
-	if (handleItem->CurItemId <= ItemId::BigFirePortion)
-	{
-	}
-	else if (handleItem->CurItemId <= ItemId::Weapon10)
-	{
-	}
-	else if (handleItem->CurItemId <= ItemId::Equipment10)
-	{
-	}
-	else
-	{
-		ErrorCode();
-		return;
-	}
-	HandleItemErase(handleItem);
-}
-
-void MainItem::UseItem(ItemId Item)
-{
-	if (Item <= ItemId::BigFirePortion)
-	{
-	}
-	else if (Item <= ItemId::Weapon10)
-	{
-	}
-	else if (Item <= ItemId::Equipment10)
-	{
-	}
-	else
-	{
-		ErrorCode();
-		return;
-	}
-}
-
-
-void MainItem::ChangeHandleItem(int item)
-{
-
-}
-
 void MainItem::AddItem(ItemId item)
 {
 
@@ -176,7 +136,99 @@ void MainItem::AddItem(ItemId item)
 	}
 }
 
-void MainItem::PortionUse(ItemId test)
+
+void MainItem::initEffects()
+{
+	effects = {
+	{ ItemId::HealthPortion, std::bind(&MainItem::HealthPortionEffect, this) },
+	{ ItemId::BigHealthPortion, std::bind(&MainItem::BigHealthPortionEffect , this) },
+	{ ItemId::PowerPortion, std::bind(&MainItem::PowerPortionEffect , this) },
+	{ ItemId::BigPowerPortion, std::bind(&MainItem::BigPowerPortionEffect , this) },
+	{ ItemId::Potion4, std::bind(&MainItem::Potion4Effect , this) },
+	{ ItemId::Potion5, std::bind(&MainItem::Potion5Effect , this) },
+	{ ItemId::Potion6, std::bind(&MainItem::Potion6Effect , this) },
+	{ ItemId::Potion7, std::bind(&MainItem::Potion7Effect , this) },
+	{ ItemId::FirePortion, std::bind(&MainItem::FirePortionEffect , this) },
+	{ ItemId::BigFirePortion, std::bind(&MainItem::BigFirePortionEffect, this) },
+	{ ItemId::Weapon1, std::bind(&MainItem::Weapon1Effect , this) },
+	{ ItemId::Weapon2, std::bind(&MainItem::Weapon2Effect , this) },
+	{ ItemId::Weapon3, std::bind(&MainItem::Weapon3Effect , this) },
+	{ ItemId::Weapon4, std::bind(&MainItem::Weapon4Effect , this) },
+	{ ItemId::Weapon5, std::bind(&MainItem::Weapon5Effect , this) },
+	{ ItemId::Weapon6, std::bind(&MainItem::Weapon6Effect , this) },
+	{ ItemId::Weapon7, std::bind(&MainItem::Weapon7Effect , this) },
+	{ ItemId::Weapon8, std::bind(&MainItem::Weapon8Effect , this) },
+	{ ItemId::Weapon9, std::bind(&MainItem::Weapon9Effect , this) },
+	{ ItemId::Weapon10, std::bind(&MainItem::Weapon10Effect , this) },
+	{ ItemId::Equipment1 , std::bind(&MainItem::Equipment1Effect, this) },
+	{ ItemId::Equipment2, std::bind(&MainItem::Equipment2Effect, this) },
+	{ ItemId::Equipment3, std::bind(&MainItem::Equipment3Effect, this) },
+	{ ItemId::Equipment4, std::bind(&MainItem::Equipment4Effect, this) },
+	{ ItemId::Equipment5, std::bind(&MainItem::Equipment5Effect, this) },
+	{ ItemId::Equipment6, std::bind(&MainItem::Equipment6Effect, this) },
+	{ ItemId::Equipment7, std::bind(&MainItem::Equipment7Effect, this) },
+	{ ItemId::Equipment8, std::bind(&MainItem::Equipment8Effect, this) },
+	{ ItemId::Equipment9, std::bind(&MainItem::Equipment9Effect, this) },
+	{ ItemId::Equipment10, std::bind(&MainItem::Equipment10Effect , this) } };
+	removeEffects =
+	{
+		{ ItemId::Weapon1, std::bind(&MainItem::RemoveWeapon1Effect , this) },
+		{ ItemId::Weapon2, std::bind(&MainItem::RemoveWeapon2Effect , this) },
+		{ ItemId::Weapon3, std::bind(&MainItem::RemoveWeapon3Effect , this) },
+		{ ItemId::Weapon4, std::bind(&MainItem::RemoveWeapon4Effect , this) },
+		{ ItemId::Weapon5, std::bind(&MainItem::RemoveWeapon5Effect , this) },
+		{ ItemId::Weapon6, std::bind(&MainItem::RemoveWeapon6Effect , this) },
+		{ ItemId::Weapon7, std::bind(&MainItem::RemoveWeapon7Effect , this) },
+		{ ItemId::Weapon8, std::bind(&MainItem::RemoveWeapon8Effect , this) },
+		{ ItemId::Weapon9, std::bind(&MainItem::RemoveWeapon9Effect , this) },
+		{ ItemId::Weapon10, std::bind(&MainItem::RemoveWeapon10Effect , this) },
+		{ ItemId::Equipment1, std::bind(&MainItem::RemoveEquipment1Effect, this) },
+		{ ItemId::Equipment2, std::bind(&MainItem::RemoveEquipment2Effect, this) },
+		{ ItemId::Equipment3, std::bind(&MainItem::RemoveEquipment3Effect, this) },
+		{ ItemId::Equipment4, std::bind(&MainItem::RemoveEquipment4Effect, this) },
+		{ ItemId::Equipment5, std::bind(&MainItem::RemoveEquipment5Effect, this) },
+		{ ItemId::Equipment6, std::bind(&MainItem::RemoveEquipment6Effect, this) },
+		{ ItemId::Equipment7, std::bind(&MainItem::RemoveEquipment7Effect, this) },
+		{ ItemId::Equipment8, std::bind(&MainItem::RemoveEquipment8Effect, this) },
+		{ ItemId::Equipment9, std::bind(&MainItem::RemoveEquipment9Effect, this) },
+		{ ItemId::Equipment10, std::bind(&MainItem::RemoveEquipment10Effect , this) }
+	};
+}
+
+// 장비 장착 함수
+void MainItem::ItemTypeEffect(ItemId id) {
+	if (ItemId::BigFirePortion < id)
+	{
+		applyEffect(id);
+	}
+	else if (std::find(equippedItems.begin(), equippedItems.end(), id) == equippedItems.end()) {
+		equippedItems.push_back(id); // 중복 장착 방지
+		applyEffect(id);             // 장비 효과 적용
+	}
+	else {
+		std::cout << "Item is already equipped.\n";
+	}
+}
+
+// 장비 해제 함수
+void MainItem::UnItemTypeEffect(ItemId id) {
+	auto it = std::find(equippedItems.begin(), equippedItems.end(), id);
+	if (it != equippedItems.end()) {
+		RemoveEffect(id);            // 장비 효과 제거
+		equippedItems.erase(it);         // 목록에서 제거
+	}
+	else {
+		std::cout << "Item is not equipped.\n";
+	}
+}
+
+// 장착된 모든 장비의 효과를 일괄 적용
+void MainItem::applyEquippedItems() {
+	for (const auto& item : equippedItems) {
+		applyEffect(item);
+	}
+}
+void MainItem::applyEffect(ItemId test)
 {
 	auto effect = effects.find(test);  // ItemId에 해당하는 효과 함수 검색
 	if (effect != effects.end()) {
@@ -186,19 +238,19 @@ void MainItem::PortionUse(ItemId test)
 		std::cout << "No effect for this item.\n";
 	}
 }
-void MainItem::OpenItemBag()
+void MainItem::RemoveEffect(ItemId test)
 {
-	vector<ItemMMOR>::iterator BeginhandleItem = ItemBag.begin();
-
-	for (int i = 0; i < ItemBag.size(); ++BeginhandleItem, ++i)
-	{
-		//int GetId = GetInst()->SelectId(BeginhandleItem);
-		string GetName = SelectName(BeginhandleItem);
-		std::cout << i + 1 << ". " << GetName << std::endl;
+	auto effect = removeEffects.find(test);  // ItemId에 해당하는 효과 함수 검색
+	if (effect != removeEffects.end()) {
+		effect->second();  // 해당 함수 호출하여 아이템 효과 적용
 	}
-
-
+	else {
+		std::cout << "No effect for this item.\n";
+	}
 }
+
+// 아이템 효과 대충 만듬 나중에 밸런스 보면서 넣기
+// 아이템 사용
 void MainItem::HealthPortionEffect()
 {
 	Ccore::GetInst()->LimitHealthUp(5);
@@ -239,6 +291,7 @@ void MainItem::BigFirePortionEffect()
 {
 	Ccore::GetInst()->Newbarrier(5);
 }
+// 무기 장착										
 void MainItem::Weapon1Effect()
 {
 	Ccore::GetInst()->PowerUp(5);
@@ -279,6 +332,7 @@ void MainItem::Weapon10Effect()
 {
 	Ccore::GetInst()->PowerUp(5);
 }
+// 장비 장착
 void MainItem::Equipment1Effect()
 {
 	Ccore::GetInst()->DefenseUp(5);
@@ -319,6 +373,88 @@ void MainItem::Equipment10Effect()
 {
 	Ccore::GetInst()->DefenseUp(5);
 }
+// 무기 해체
+void MainItem::RemoveWeapon1Effect()
+{
+	Ccore::GetInst()->PowerUp(5);
+}
+void MainItem::RemoveWeapon2Effect()
+{
+	Ccore::GetInst()->PowerUp(5);
+}
+void MainItem::RemoveWeapon3Effect()
+{
+	Ccore::GetInst()->PowerUp(5);
+}
+void MainItem::RemoveWeapon4Effect()
+{
+	Ccore::GetInst()->PowerUp(5);
+}
+void MainItem::RemoveWeapon5Effect()
+{
+	Ccore::GetInst()->PowerUp(5);
+}
+void MainItem::RemoveWeapon6Effect()
+{
+	Ccore::GetInst()->PowerUp(5);
+}
+void MainItem::RemoveWeapon7Effect()
+{
+	Ccore::GetInst()->PowerUp(5);
+}
+void MainItem::RemoveWeapon8Effect()
+{
+	Ccore::GetInst()->PowerUp(5);
+}
+void MainItem::RemoveWeapon9Effect()
+{
+	Ccore::GetInst()->PowerUp(5);
+}
+void MainItem::RemoveWeapon10Effect()
+{
+	Ccore::GetInst()->PowerUp(5);
+}
+// 장비 해체
+void MainItem::RemoveEquipment1Effect()
+{
+	Ccore::GetInst()->DefenseUp(5);
+}
+void MainItem::RemoveEquipment2Effect()
+{
+	Ccore::GetInst()->DefenseUp(5);
+}
+void MainItem::RemoveEquipment3Effect()
+{
+	Ccore::GetInst()->DefenseUp(5);
+}
+void MainItem::RemoveEquipment4Effect()
+{
+	Ccore::GetInst()->DefenseUp(5);
+}
+void MainItem::RemoveEquipment5Effect()
+{
+	Ccore::GetInst()->DefenseUp(5);
+}
+void MainItem::RemoveEquipment6Effect()
+{
+	Ccore::GetInst()->DefenseUp(5);
+}
+void MainItem::RemoveEquipment7Effect()
+{
+	Ccore::GetInst()->DefenseUp(5);
+}
+void MainItem::RemoveEquipment8Effect()
+{
+	Ccore::GetInst()->DefenseUp(5);
+}
+void MainItem::RemoveEquipment9Effect()
+{
+	Ccore::GetInst()->DefenseUp(5);
+}
+void MainItem::RemoveEquipment10Effect()
+{
+	Ccore::GetInst()->DefenseUp(5);
+}
 
 
 
@@ -327,36 +463,7 @@ MainItem::MainItem()
 	:ItemBag()
 	, handleItem{}
 	, effects{
-	{ ItemId::HealthPortion, std::bind(&MainItem::HealthPortionEffect, this) },
-	{ ItemId::BigHealthPortion, std::bind(&MainItem::BigHealthPortionEffect , this) },
-	{ ItemId::PowerPortion, std::bind(&MainItem::PowerPortionEffect , this) },
-	{ ItemId::BigPowerPortion, std::bind(&MainItem::BigPowerPortionEffect , this) },
-	{ ItemId::Potion4, std::bind(&MainItem::Potion4Effect , this) },
-	{ ItemId::Potion5, std::bind(&MainItem::Potion5Effect , this) },
-	{ ItemId::Potion6, std::bind(&MainItem::Potion6Effect , this) },
-	{ ItemId::Potion7, std::bind(&MainItem::Potion7Effect , this) },
-	{ ItemId::FirePortion, std::bind(&MainItem::FirePortionEffect , this) },
-	{ ItemId::BigFirePortion, std::bind(&MainItem::BigFirePortionEffect, this) },
-	{ ItemId::Weapon1, std::bind(&MainItem::Weapon1Effect , this) },
-	{ ItemId::Weapon2, std::bind(&MainItem::Weapon2Effect , this) },
-	{ ItemId::Weapon3, std::bind(&MainItem::Weapon3Effect , this) },
-	{ ItemId::Weapon4, std::bind(&MainItem::Weapon4Effect , this) },
-	{ ItemId::Weapon5, std::bind(&MainItem::Weapon5Effect , this) },
-	{ ItemId::Weapon6, std::bind(&MainItem::Weapon6Effect , this) },
-	{ ItemId::Weapon7, std::bind(&MainItem::Weapon7Effect , this) },
-	{ ItemId::Weapon8, std::bind(&MainItem::Weapon8Effect , this) },
-	{ ItemId::Weapon9, std::bind(&MainItem::Weapon9Effect , this) },
-	{ ItemId::Weapon10, std::bind(&MainItem::Weapon10Effect , this) },
-	{ ItemId::Equipment1 , std::bind(&MainItem::Equipment1Effect, this) },
-	{ ItemId::Equipment2, std::bind(&MainItem::Equipment2Effect, this) },
-	{ ItemId::Equipment3, std::bind(&MainItem::Equipment3Effect, this) },
-	{ ItemId::Equipment4, std::bind(&MainItem::Equipment4Effect, this) },
-	{ ItemId::Equipment5, std::bind(&MainItem::Equipment5Effect, this) },
-	{ ItemId::Equipment6, std::bind(&MainItem::Equipment6Effect, this) },
-	{ ItemId::Equipment7, std::bind(&MainItem::Equipment7Effect, this) },
-	{ ItemId::Equipment8, std::bind(&MainItem::Equipment8Effect, this) },
-	{ ItemId::Equipment9, std::bind(&MainItem::Equipment9Effect, this) },
-	{ ItemId::Equipment10, std::bind(&MainItem::Equipment10Effect , this) } }
+	}
 {}
 MainItem::~MainItem()
 {

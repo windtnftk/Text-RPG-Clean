@@ -32,7 +32,7 @@ enum class ItemId
 	Equipment8,
 	Equipment9,
 	Equipment10,
-	End =32,
+	End = 32,
 };
 // 그러니까 아이템을 사용할때 이름값만 가져오면 어떤아이템을 사용되는지 
 // 확인되고 사용하는 함수? 를 만들고 싶은거자나
@@ -44,7 +44,7 @@ struct ItemMMOR
 {
 	ItemId		CurItemId;
 	string		ItemName; //아이템 이름 저장
-	
+
 };
 
 
@@ -56,9 +56,9 @@ public:
 	vector<ItemMMOR>  ItemBag;
 	//손에 있는 아이템
 	vector<ItemMMOR>::iterator handleItem; //일단 privite 로 만들어서 사용해야 될듯
-	
+
 public:
-	
+
 	// 아이템 init
 	void ItemInit();
 	//HandleItem 지우기, 일단 privite 로 만들어서 사용해야 될듯
@@ -69,22 +69,41 @@ public:
 	ItemId SelectId(const vector<ItemMMOR>::iterator& ItemId);
 	// iterator 주소값을 id string값 뽑아오는 함수
 	string SelectName(const vector<ItemMMOR>::iterator& ItemId);
+	
+	// 지정한 아이템 사용하는 함수 -> 그냥 효과 발동
+	// 사용 x
+	//void UseItem(ItemId Item);
+	// handleItem로 지정한 아이템 사용하는 함수 -> 소지품 사용 -> 아이템 삭제
+	// 사용 x
+	//void UseItem();
+	// handleItem을 원하는 위치로 변경하는 함수
+	// 사용 x
+	//void ChangeHandleItem(int item);
 	// 아이템 사용하는 함수
 	void UseItemManuOpen();
-	// 지정한 아이템 사용하는 함수 -> 그냥 효과 발동
-	void UseItem(ItemId Item);
-	// handleItem로 지정한 아이템 사용하는 함수 -> 소지품 사용 -> 아이템 삭제
-	void UseItem();
-	// handleItem을 원하는 위치로 변경하는 함수
-	void ChangeHandleItem(int item);
 	// ItemId 입력하면 장비에 추가하는 함수
 	void AddItem(ItemId item);
-public:	//아이템 사용함수, ItemId받은거에 따라 따로 적용
-	// 모두 하나로 처리
-	void PortionUse(ItemId test);
+	// int값 입력하면 ItemId값으로 변환하는 함수
+	ItemId convert(int Num)
+	{
+		return static_cast<ItemId>(Num);
+	}
+public:	//아이템 사용함수
+	
+	// 아이템 효과 초기화 부
+	void initEffects();
+	void ItemTypeEffect(ItemId itemId);    // 장비 장착
+	void UnItemTypeEffect(ItemId itemId);  // 장비 해제
+	void applyEquippedItems();        // 장비 효과 적용
+	// ItemId받은거에 따라 모두 한 함수로 각각처리, Private 처리예정
+	void applyEffect(ItemId test);
+	// ItemId받은거에 따라 모두 한 함수로 각각처리, Private 처리예정
+	void RemoveEffect(ItemId test);
 public:
 	// 각 ItemId에 대응하는 효과 함수를 저장할 맵핑 테이블
 	std::unordered_map<ItemId, std::function<void()>> effects;
+	std::unordered_map<ItemId, std::function<void()>> removeEffects;
+	vector<ItemId> equippedItems; // 장비한 장비 목록
 
 	void HealthPortionEffect();
 	void BigHealthPortionEffect();
@@ -96,26 +115,46 @@ public:
 	void Potion7Effect();
 	void FirePortionEffect();
 	void BigFirePortionEffect();
-	void Weapon1Effect();
-	void Weapon2Effect();
-	void Weapon3Effect();
-	void Weapon4Effect();
-	void Weapon5Effect();
-	void Weapon6Effect();
-	void Weapon7Effect();
-	void Weapon8Effect();
-	void Weapon9Effect();
-	void Weapon10Effect();
-	void Equipment1Effect();
-	void Equipment2Effect();
-	void Equipment3Effect();
-	void Equipment4Effect();
-	void Equipment5Effect();
-	void Equipment6Effect();
-	void Equipment7Effect();
-	void Equipment8Effect();
-	void Equipment9Effect();
-	void Equipment10Effect();
+	void Weapon1Effect();			void RemoveWeapon1Effect();
+	void Weapon2Effect();			void RemoveWeapon2Effect();
+	void Weapon3Effect();			void RemoveWeapon3Effect();
+	void Weapon4Effect();			void RemoveWeapon4Effect();
+	void Weapon5Effect();			void RemoveWeapon5Effect();
+	void Weapon6Effect();			void RemoveWeapon6Effect();
+	void Weapon7Effect();			void RemoveWeapon7Effect();
+	void Weapon8Effect();			void RemoveWeapon8Effect();
+	void Weapon9Effect();			void RemoveWeapon9Effect();
+	void Weapon10Effect();			void RemoveWeapon10Effect();
+	void Equipment1Effect();		void RemoveEquipment1Effect();
+	void Equipment2Effect();		void RemoveEquipment2Effect();
+	void Equipment3Effect();		void RemoveEquipment3Effect();
+	void Equipment4Effect();		void RemoveEquipment4Effect();
+	void Equipment5Effect();		void RemoveEquipment5Effect();
+	void Equipment6Effect();		void RemoveEquipment6Effect();
+	void Equipment7Effect();		void RemoveEquipment7Effect();
+	void Equipment8Effect();		void RemoveEquipment8Effect();
+	void Equipment9Effect();		void RemoveEquipment9Effect();
+	void Equipment10Effect();		void RemoveEquipment10Effect();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 };

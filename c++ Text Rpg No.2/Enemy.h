@@ -37,6 +37,11 @@ struct E_Info
 	int				E_Plase;//몬스터 생존위치
 	bool			E_Life;//몬스터 생존여부
 };
+struct E_Check
+{
+	B_Status	Info;// 적 처치후 적 정보
+	bool		Check;//반환값으로 false는 실패, true면 성공
+};
 
 
 
@@ -46,7 +51,7 @@ class EneMy
 public:
 	map<EnemyId, E_Info> E_BasicInfo;//적의 모든정보
 	map<EnemyId, E_Info>::iterator	E_Point; //적 세팅
-	
+
 public:		// 설정 및 초기화 함수
 
 	// 정보 초기화
@@ -65,7 +70,13 @@ public:		//적과 전투하는 함수
 	E_Info SetEnemyInfo();
 	// 모든 적들 정보 순회하는 함수
 	void ViewEnemy();
-	
+	// 인수로 받은 적의 정보를 받아 적이 생존해 있는지 확인
+	// 적이 공격 및 행동 전 한번 확인용, false가 나오면 바로 리턴
+	bool DeadCheck(E_Info Info)
+	{
+		return (Info.E_BInfo.C_Health > 0) ? true : false;
+	}
+
 
 public:		// 각종 변환 함수, 내용출력 함수
 
@@ -73,7 +84,8 @@ public:		// 각종 변환 함수, 내용출력 함수
 	void printEnemyBaseInfo(EnemyId data);
 	// E_Info값 받으면 출력하는 함수
 	// 반환값으로 입력된 적의 체력이 없는지 확인
-	bool printCurInfo(E_Info data);
+	// ㄴ DeadCheck로 확인하도록 변경
+	void printCurInfo(E_Info data);
 	// 원하는 id 값을 Cur 정보로 출력해주는 함수
 	// 현재 사용하지 않음
 	void printEnemyCurInfo(EnemyId data);

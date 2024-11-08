@@ -1,6 +1,8 @@
 #pragma once
-#include "Enemy.h"
 
+struct E_Info;
+struct E_Check;
+struct B_Status;
 enum class GameMode
 {
 	GameEnd,
@@ -54,11 +56,16 @@ struct PlayerData
 	//기본값은 false, 저장시 true로 변환, DataFileSave함수를 통해 true변환해야됨
 	//오류 발생시에 false값으로 변환됨
 	bool	SaveThis;
+	// 저장데이터로 가지지않고 전투함수 중 순간 보호막 효과 발휘
+	int		Barrier;
 };
+// 컴파일 타임 상수, 레벨업시 현재레벨 과 곱해서 최대 Exp를 만드는 상수값
+constexpr int Multiplier = 20;  
 // Main 설정 진행 장소 
 class Ccore
 {
-	
+	friend class EneMy;
+	friend class MainItem;
 	SINGLE(Ccore);
 	PlayerData	MaxDataInfo; //플레이어 최대 값
 	// 예) PlayerInfo의 경험치가 MaxDataInfo에 있는 경험치보다 높아지면 레벨업
@@ -73,6 +80,7 @@ public:		// 기본 Init관련 함수
 	// Main 프로그램이 시작하기전 초기값 설정
 	void	Init();
 	// Main Init 시 불러온 값에 따라 MaxDataInfo 초기화 하는 함수
+	// LevelUp후 MaxDataInfo 초기화
 	void	MaxDataInit();
 	// Player 기본정보 Initial 진행 
 	void	P_DataInit() { PlayerInfoLoding(LodingData(DataFile::BasicData)); }
@@ -97,26 +105,60 @@ public:		// 설정관련 함수
 	// Player Name 설정함수
 	void	PlayerNameSeting();
 
-public:		// 전투관련 함수
 
+public:		//	전투후 처리 함수
+	//	보상 흭득, 레벨업조건 확인 및 적용
+	void	BattleAfter(E_Check Info);
+	// 보상 얻은후 다음스테이지로 이동
+	void	NextStage();
+
+public:		// 레벨업 전담 함수
+
+	// 보상얻는 함수, 적의 데이터 받아서 경험치만 얻는 함수
+	// 후에 아이템이나 추가효과 얻게 바꿀예정(24.11.08 미적용)
+	void	RewardCheck(B_Status Reward);
+	// 경험치 보상 및 Exp 넘었는지 총괄 함수
+	void	RewardExp(B_Status Reward);
+	// 경험치 보상후 레벨업 Check 및 얼마나 남았는지 Check
+	void	LevelUpCheck();
+	// 최대 Exp값 조정작업
+	void	MaxExpConnect();
+	// 레벨업 시 알림, Init시에는 ㄴㄴ
+	void	LevelUpView();
+	// 레벨업 후 조정작업
+	// 이걸로 평균 만들자
+	void	L_Upstatus();
+
+public:		// 전투처리 함수
 	// 전투화면으로 진행하는 함수
-	void	BattleStartInit();
+	// 반환값을 bool값으로 줄수 있으니까
+	// 플레이어 사망, 각종 이유로 죽으면 false(지금은 PlayerLifeCheck로 확인)
+	// 기본으로는 true로 반환하도록 해서 일관성을 주자(24.11.08 미적용)
+	E_Check	BattleStartInit();
 	// 플레이어 상태값 출력, 전투중
 	// 이름, 레벨, 공격력, 방어력, 체력, 현재 경험치, 필요 경험치
 	void	PlayerInfoView();
 	// 적이 피해받는 함수, 플레이어 공격력 만큼만 데미지 받음
 	// 추후에 다른 계산 필요
-	E_Info Hitdamage(E_Info Enemy);
+	E_Info Hitdamage(E_Info Info);
 	// 적의 공격을 총괄하는 함수
 	// 적 공격으로 플레이어 사망시 false 반환
-	// 조정해서 바로 반복문 종료로 넘어가게 설정해
-	bool	EnemyTurn(E_Info Enemy);
+	// ㄴ 이 기능 없앰
+	bool	EnemyTurn(E_Info Info);
 	// 적 입력시 적의 공격력 참고하여 플레이어에게 데미지입힘
 	// 방어력 계산 X
-	void EnemyAttack(E_Info Enemy);
+	void EnemyAttack(E_Info Info);
 	// 내가 죽었는지 확인하는 함수
 	bool PlayerLifeCheck();
+public:
+	// 집적적으로 상대에게 추가뎀(보류)
 	
+	// 전투 후 강화상태 풀기 진행해야됨
+	void PowerUp(int test) { PlayerInfo.Power += test; } //PowerUp
+	void DefenseUp(int test) { PlayerInfo.Defense += test; } //DefenseUp
+	void LimitHealthUp(int test); //최대 체력 확인해서 한계치 까지만 회복
+	void Newbarrier(int test);	//방어막 생성
+
 public:		// 데이터 저장
 
 	// 데이터 저장전 인테페이스 출력
@@ -140,8 +182,6 @@ public:		// 데이터 불러오기
 
 public:		// Auto 용
 
-	// 반환값으로 입력의 int값 받는 함수
-	int		CinAuto();
 	// PlayerInfo를 string으로 변환해서 반환하는 함수
 	string  PlayInfoToSting();
 	// DataFile을 PlayerData로 반환하는 함수
@@ -164,6 +204,6 @@ public:		// 변환함수
 	int convert(DataFile dataFile) {
 		return static_cast<int>(dataFile);
 	}
-	friend class EneMy;
+
 };
 

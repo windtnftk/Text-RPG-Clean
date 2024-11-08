@@ -15,7 +15,7 @@ void Ccore::Progress()
 	//SelectSavePoint();
 	//SaveDataLoding();
 	//CurDataSave();
-	BattleStartInit();
+	BattleAfter(BattleStartInit());
 }
 void Ccore::Init()
 {
@@ -30,8 +30,9 @@ void Ccore::Init()
 void Ccore::MaxDataInit()
 {
 	MaxDataInfo = PlayerInfo;
-	MaxDataInfo.Exp = PlayerInfo.Level * 20;
+	MaxExpConnect();
 }
+
 
 void Ccore::GameStartSet()
 {
@@ -184,13 +185,69 @@ void Ccore::PlayerNameSeting()
 	}
 	Ccore::GetInst()->PlayerInfo.PlayerName = NewName;
 }
-void Ccore::BattleStartInit()
+void Ccore::BattleAfter(E_Check Info)
+{
+	if (!Info.Check) {
+		std::cout << "플레이어가 죽었습니다." << std::endl; return;
+	} // 반환값이 false면 보상 못얻고 종료
+	RewardCheck(Info.Info);
+	NextStage();
+}
+void Ccore::NextStage()
+{
+	++PlayerInfo.CurStage;
+	++MaxDataInfo.CurStage;
+	++EneMy::GetInst()->E_Point;
+}
+void Ccore::RewardCheck(B_Status Reward)
+{
+	RewardExp(Reward);
+
+}
+void Ccore::RewardExp(B_Status Reward)
+{
+	PlayerInfo.Exp += Reward.C_Exp;
+	LevelUpCheck();
+}
+void Ccore::LevelUpCheck()
+{
+	if (PlayerInfo.Exp < MaxDataInfo.Exp) return;
+	// 최대 Exp보다 현재 Exp가 클경우 반복해서 레벨업
+	while (PlayerInfo.Exp > MaxDataInfo.Exp)
+	{
+		PlayerInfo.Exp -= MaxDataInfo.Exp;
+		++PlayerInfo.Level;
+		++MaxDataInfo.Level;
+		MaxExpConnect();
+		LevelUpView();
+	}
+	std::cout << "현재 레벨: " << PlayerInfo.Level << std::endl;
+	L_Upstatus();
+}
+void Ccore::MaxExpConnect()
+{
+	MaxDataInfo.Exp = PlayerInfo.Level * Multiplier;
+}
+void Ccore::LevelUpView()
+{
+	std::cout << "!!!레벨업!!!" << std::endl;
+}
+void Ccore::L_Upstatus()
+{
+	auto test = PlayerInfo.Level;
+	PlayerInfo.Power = Multiplier * test;
+	PlayerInfo.Defense = Multiplier * test;
+	PlayerInfo.Health = Multiplier * test;
+	MaxDataInit();
+}
+E_Check Ccore::BattleStartInit()
 {
 	E_Info test = EneMy::GetInst()->SetEnemyInfo();
 	// 적 또는 플레이어가 사망해야 반복문이 끝남
-	// 적의 체력이 다 떨어지면 자동으로 반복문 off
-	while (EneMy::GetInst()->printCurInfo(test))
+	// 플레이어, 적의 체력이 다 떨어지면 자동으로 반복문 off
+	while (EneMy::GetInst()->DeadCheck(test) && PlayerLifeCheck())
 	{
+		EneMy::GetInst()->printCurInfo(test);
 		// 플레이어 턴
 		bool End = true;
 		while (End)
@@ -206,7 +263,7 @@ void Ccore::BattleStartInit()
 			case 2:
 				MainItem::GetInst()->UseItemManuOpen();
 				//UseItem 함수 제작중, 적을 공격 및 적의 공격 먼저 만들자 <== 24.11.03
-
+				End = false;
 				break;
 			case 3:
 				PlayerInfoView();
@@ -215,13 +272,20 @@ void Ccore::BattleStartInit()
 				ErrorCode();
 				break;
 			}
+		}// 플레이어 턴 종료
+		if (!EneMy::GetInst()->DeadCheck(test)) //적 생존여부 체크
+		{//리턴값을 적 정보, ID로 해서 적 싸운후 리턴값으로 처치 보상받자
+			return { test.E_BInfo, PlayerLifeCheck() };
+			//if (!EnemyTurn(test))
+			//{
+			//	// 리턴값을 적정보랑 실패했다는 반환값을 넣자,인수 2개
+			//	GameOver();
+			//	return { test.E_BInfo, PlayerLifeCheck() };
+			//};
 		}
-		if (!EnemyTurn(test))
-		{
-			GameOver();
-			return;
-		};
+		EnemyTurn(test);// 적 턴 시작
 	}
+	return { test.E_BInfo, PlayerLifeCheck() };
 }
 void Ccore::PlayerInfoView()
 {
@@ -231,45 +295,52 @@ void Ccore::PlayerInfoView()
 	std::cout << "방어력: " << PlayerInfo.Defense << std::endl;
 	std::cout << "체력: " << PlayerInfo.Health << std::endl;
 	std::cout << "현재 경험치: " << PlayerInfo.Exp << std::endl;
-	std::cout << "필요 경험치: " << MaxDataInfo.Exp - PlayerInfo.Exp << std::endl;
+	std::cout << "필요 경험치: " << MaxDataInfo.Exp << std::endl;
 }
-E_Info Ccore::Hitdamage(E_Info Enemy)
+E_Info Ccore::Hitdamage(E_Info Info)
 {
-	if (Enemy.E_BInfo.C_Health > 0) // 적이 살아야 내가 공격함
+	if (Info.E_BInfo.C_Health > 0) // 적이 살아야 내가 공격함
 	{
 		std::cout << PlayerInfo.Power << "의 피해를 입혔습니다." << std::endl;
-		Enemy.E_BInfo.C_Health = Enemy.E_BInfo.C_Health - PlayerInfo.Power;
+		Info.E_BInfo.C_Health = Info.E_BInfo.C_Health - PlayerInfo.Power;
 	}
-	return Enemy;
+	return Info;
 }
-bool Ccore::EnemyTurn(E_Info Enemy)
+bool Ccore::EnemyTurn(E_Info Info)
 {
-
-	EnemyAttack(Enemy);
-
-	if (!PlayerLifeCheck)
-	{
-		std::cout << "플레이어가 죽었습니다." << std::endl;
-		return false;
-	}
+	EnemyAttack(Info);
 	return true;
 
 }
-void Ccore::EnemyAttack(E_Info Enemy)
+void Ccore::EnemyAttack(E_Info Info)
 {
-	if (Enemy.E_BInfo.C_Health > 0) // 적이 살아야 적이 공격함
-	{
-		std::cout << Enemy.E_BInfo.C_Power << "의 피해를 입었습니다." << std::endl;
-		PlayerInfo.Health = PlayerInfo.Health - Enemy.E_BInfo.C_Power;
-	}
+	//if (Info.E_BInfo.C_Health > 0) // 적이 살아야 적이 공격함
+	std::cout << Info.E_BInfo.C_Power << "의 피해를 입었습니다." << std::endl;
+	PlayerInfo.Health -= Info.E_BInfo.C_Power;
 }
 bool Ccore::PlayerLifeCheck()
 {
 	if (PlayerInfo.Health < 0)
 	{
+		//std::cout << "플레이어가 죽었습니다." << std::endl;
 		return false;
 	}
 	return true;
+}
+void Ccore::LimitHealthUp(int test)
+{
+	if (PlayerInfo.Health + test > MaxDataInfo.Health)
+	{
+		PlayerInfo.Health = MaxDataInfo.Health;
+	}
+	else
+	{
+		PlayerInfo.Health += test;
+	}
+}
+void Ccore::Newbarrier(int test)
+{
+	PlayerInfo.Barrier += test;
 }
 void Ccore::SelectSavePoint()
 {
@@ -394,25 +465,7 @@ PlayerData Ccore::DataFileView(PlayerData data)
 		return data;
 	}
 }
-int Ccore::CinAuto() {
-	int choice;
-	while (true) {
-		std::cout << "숫자를 입력하세요: ";
-		std::cin >> choice;
-		if (std::cin.fail()) {
-			// 잘못된 입력이 발생했을 경우
-			std::cin.clear(); // cin의 오류 상태 플래그를 초기화
-			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // 입력 버퍼를 비웁니다.
-			std::cout << "잘못된 입력입니다.\n";
-		}
-		else
-		{
-			// 유효한 입력이 들어왔을 경우
-			std::cout << std::endl;
-			return choice; // 정상적인 경우 반복 종료 후 값 반환
-		}
-	}
-}
+
 string Ccore::PlayInfoToSting()
 {
 	return PlayerInfo.PlayerName

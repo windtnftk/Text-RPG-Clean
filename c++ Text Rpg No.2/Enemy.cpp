@@ -82,7 +82,7 @@ void EneMy::printEnemyBaseInfo(EnemyId data)
 	std::cout << "Place: " << it->second.E_Plase << std::endl;
 	std::cout << "Life: " << (it->second.E_Life ? "Alive" : "Dead") << std::endl;
 }
-bool EneMy::printCurInfo(E_Info data)
+void EneMy::printCurInfo(E_Info data)
 {
 	std::cout << "Name: " << data.E_BInfo.C_Name << std::endl;
 	std::cout << "Level: " << data.E_BInfo.C_Level << std::endl;
@@ -91,11 +91,6 @@ bool EneMy::printCurInfo(E_Info data)
 	std::cout << "Exp: " << data.E_BInfo.C_Exp << std::endl;
 	std::cout << "Place: " << data.E_Plase << std::endl;
 	std::cout << "Life: " << (data.E_Life ? "Alive" : "Dead") << std::endl;
-	if (data.E_BInfo.C_Health > 0)
-	{
-		return true;
-	}
-	return false;
 }
 void EneMy::printEnemyCurInfo(EnemyId data)
 {

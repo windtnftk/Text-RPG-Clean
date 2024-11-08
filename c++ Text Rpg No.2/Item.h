@@ -79,6 +79,43 @@ public:
 	void ChangeHandleItem(int item);
 	// ItemId 입력하면 장비에 추가하는 함수
 	void AddItem(ItemId item);
+public:	//아이템 사용함수, ItemId받은거에 따라 따로 적용
+	// 모두 하나로 처리
+	void PortionUse(ItemId test);
+public:
+	// 각 ItemId에 대응하는 효과 함수를 저장할 맵핑 테이블
+	std::unordered_map<ItemId, std::function<void()>> effects;
+
+	void HealthPortionEffect();
+	void BigHealthPortionEffect();
+	void PowerPortionEffect();
+	void BigPowerPortionEffect();
+	void Potion4Effect();
+	void Potion5Effect();
+	void Potion6Effect();
+	void Potion7Effect();
+	void FirePortionEffect();
+	void BigFirePortionEffect();
+	void Weapon1Effect();
+	void Weapon2Effect();
+	void Weapon3Effect();
+	void Weapon4Effect();
+	void Weapon5Effect();
+	void Weapon6Effect();
+	void Weapon7Effect();
+	void Weapon8Effect();
+	void Weapon9Effect();
+	void Weapon10Effect();
+	void Equipment1Effect();
+	void Equipment2Effect();
+	void Equipment3Effect();
+	void Equipment4Effect();
+	void Equipment5Effect();
+	void Equipment6Effect();
+	void Equipment7Effect();
+	void Equipment8Effect();
+	void Equipment9Effect();
+	void Equipment10Effect();
 
 
 };

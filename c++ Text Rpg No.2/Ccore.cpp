@@ -32,8 +32,6 @@ void Ccore::MaxDataInit()
 	MaxDataInfo = PlayerInfo;
 	MaxExpConnect();
 }
-
-
 void Ccore::GameStartSet()
 {
 	bool End = true;
@@ -154,34 +152,12 @@ void Ccore::PlayerNameSeting()
 		{
 			NewName = input; // 입력된 이름 사용
 		}
-
+		YesName = false;
 		// 다시확인 창, yes 입력 시 이름 쓰는 반복문 종료
 		// no 입력 시 이름 다시 쓰고 다시 확인창 반복
 		// 다른거 작동시 다시 확인창 시작
-		while (true)
-		{
-			std::cout << std::endl << "정말로 " << NewName << "이(가) 맞습니까?" << std::endl;// 다시확인 창
-			std::cout << "yes 또는 no를 입력해주십시오" << std::endl;
-			std::cin >> boolinput;
-			for (char& c : boolinput)
-			{
-				c = std::tolower(c);
-			}
-			if ("yes" == boolinput)
-			{
-				YesName = false;
-				break;
-			}
-			else if ("no" == boolinput)
-			{
-				break;
-			}
-			else
-			{
-				ErrorCode();
-			}
-		}
-		//std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+		std::cout << std::endl << "정말로 " << NewName << "이(가) 맞습니까?" << std::endl;// 다시확인 창
+		if (Yes_No) return; // yes입력시 함수 종료,no 입력시 while문 반복
 	}
 	Ccore::GetInst()->PlayerInfo.PlayerName = NewName;
 }
@@ -252,7 +228,6 @@ E_Check Ccore::BattleStartInit()
 		bool End = true;
 		while (End)
 		{
-
 			std::cout << std::endl << "[1.일반공격]" << " [2.아이템사용] " << "[3.상태창]" << std::endl << std::endl;
 			switch (CinAuto())
 			{
@@ -325,6 +300,7 @@ bool Ccore::PlayerLifeCheck()
 	}
 	return true;
 }
+#pragma region ItemEffect
 void Ccore::LimitHealthUp(int test)
 {
 	if (PlayerInfo.Health + test > MaxDataInfo.Health)
@@ -338,8 +314,34 @@ void Ccore::LimitHealthUp(int test)
 }
 void Ccore::Newbarrier(int test)
 {
-	PlayerInfo.Barrier += test;
+	lasting.Barrier += test;
 }
+
+void Ccore::AddPowerUp(int test)
+{
+	lasting.Power += test;
+}
+
+void Ccore::AddDefenseUp(int test)
+{
+	lasting.Defense += test;
+}
+
+void Ccore::Removebarrier(int test)
+{
+	lasting.Barrier -= test;
+}
+
+void Ccore::RemovePowerUp(int test)
+{
+	lasting.Power -= test;
+}
+
+void Ccore::RemoveDefenseUp(int test)
+{
+	lasting.Defense -= test;
+}
+#pragma endregion
 void Ccore::SelectSavePoint()
 {
 	if (!AllFileCheck())
@@ -547,8 +549,10 @@ bool Ccore::CheckSavefile(DataFile dataFile)
 	return false;
 }
 Ccore::Ccore()
-	:PlayerInfo{}
+	: MaxDataInfo{}
+	, PlayerInfo{}
 	, ModeCur(GameMode::Normal)
+	, lasting{}
 {
 }
 Ccore::~Ccore()

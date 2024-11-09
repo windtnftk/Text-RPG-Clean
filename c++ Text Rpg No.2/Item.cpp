@@ -35,41 +35,35 @@ string ItemArr[(int)ItemId::End] =
 	"Equipment9",
 	"Equipment10",
 };
-
-
-
-
 void MainItem::ItemInit()
-{
-	//item을 랜덤으로 3개만 추가 하고 싶은데
-	// 일단 5,2,6 이런식으로 고정된 시드값 넣어보자
-	/*
-	for (int i = 0; i < (int)ItemId::End; ++i)
-	{
-		ItemMMOR NewItem = { static_cast<ItemId>(i),ItemArr[i]};
-		ItemBag.push_back(NewItem);
-	}
-	*/
-	//std::random_device rd;
-	//std::mt19937 gen(rd()); // Mersenne Twister 알고리즘을 사용하는 엔진 생성
-
-	//// 균일 분포에서 랜덤한 정수 생성 (0 이상 99 이하)
-	//std::uniform_int_distribution<int> distribution(0, 99);
-
-	//for (int i = 0; i < 9; ++i)
-	//{
-	//	int rendom = distribution(gen) % 10;
-	//	ItemMMOR NewItem = { static_cast<ItemId>(rendom),ItemArr[rendom] };
-	//	ItemBag.push_back(NewItem);
-	//}
-
+{		/*
+		//item을 랜덤으로 3개만 추가 하고 싶은데
+		// 일단 5,2,6 이런식으로 고정된 시드값 넣어보자
+		
+		for (int i = 0; i < (int)ItemId::End; ++i)
+		{
+			ItemMMOR NewItem = { static_cast<ItemId>(i),ItemArr[i]};
+			ItemBag.push_back(NewItem);
+		}
+		
+		std::random_device rd;
+		std::mt19937 gen(rd()); // Mersenne Twister 알고리즘을 사용하는 엔진 생성
+		// 균일 분포에서 랜덤한 정수 생성 (0 이상 99 이하)
+		std::uniform_int_distribution<int> distribution(0, 99);
+		for (int i = 0; i < 9; ++i)
+		{
+			int rendom = distribution(gen) % 10;
+			ItemMMOR NewItem = { static_cast<ItemId>(rendom),ItemArr[rendom] };
+			ItemBag.push_back(NewItem);
+		}
+		*/
+	
 	AddItem(ItemId::Weapon1);
 	AddItem(ItemId::Equipment1);
 	AddItem(ItemId::HealthPortion);
 	handleItem = ItemBag.begin();
 	OpenItemBag();
 }
-
 void MainItem::HandleItemErase(vector<ItemMMOR>::iterator& ItemId)
 {
 	if (ItemId != ItemBag.end())
@@ -124,7 +118,6 @@ void MainItem::UseItemManuOpen()
 }
 void MainItem::AddItem(ItemId item)
 {
-
 	if (item <= ItemId::Equipment10)
 	{
 		ItemMMOR test = { item, ItemArr[static_cast<int>(item)] };
@@ -135,8 +128,46 @@ void MainItem::AddItem(ItemId item)
 		std::cout << "잘못된 아이템 아이디입니다." << std::endl;
 	}
 }
-
-
+void MainItem::TotalequippedItems()
+{
+	if (!ViewEquippedItems())return;
+	std::cout << "장비를 해체하시겠습니까?" << std::endl;
+	if (!Yes_No) return;
+	std::cout << "어떤장비를 해체하시겠습니까?" << std::endl;
+	MoveEquipped(CinAuto());
+	
+}
+bool MainItem::ViewEquippedItems()
+{
+	std::cout << "장착중인 장비" ;
+	if (equippedItems.empty())
+	{
+		std::cout <<"가 없습니다."<< std::endl;
+		return false;
+	}
+	std::cout << std::endl;
+	for (auto q : equippedItems)
+	{
+		auto it = static_cast<int>(q);
+		std::cout <<"1. " << std::endl << ItemArr[it] << ", " << std::endl;
+	}
+}
+void MainItem::MoveEquipped(int choice)
+{
+	auto it = equippedItems.begin();
+	for (int i = 1; i < choice; ++i)
+	{
+		++it;
+	}
+	if (equippedItems.end() == it)
+	{
+		ErrorCode();
+		return;
+	}
+	equippedItems.erase(it); // 장비 해체
+	AddItem(convert(choice)); // 아이템으로 복귀
+}
+// 아이템 효과 초기화
 void MainItem::initEffects()
 {
 	effects = {
@@ -194,7 +225,6 @@ void MainItem::initEffects()
 		{ ItemId::Equipment10, std::bind(&MainItem::RemoveEquipment10Effect , this) }
 	};
 }
-
 // 장비 장착 함수
 void MainItem::ItemTypeEffect(ItemId id) {
 	if (ItemId::BigFirePortion < id)
@@ -209,7 +239,6 @@ void MainItem::ItemTypeEffect(ItemId id) {
 		std::cout << "Item is already equipped.\n";
 	}
 }
-
 // 장비 해제 함수
 void MainItem::UnItemTypeEffect(ItemId id) {
 	auto it = std::find(equippedItems.begin(), equippedItems.end(), id);
@@ -221,7 +250,6 @@ void MainItem::UnItemTypeEffect(ItemId id) {
 		std::cout << "Item is not equipped.\n";
 	}
 }
-
 // 장착된 모든 장비의 효과를 일괄 적용
 void MainItem::applyEquippedItems() {
 	for (const auto& item : equippedItems) {
@@ -248,216 +276,122 @@ void MainItem::RemoveEffect(ItemId test)
 		std::cout << "No effect for this item.\n";
 	}
 }
-
 // 아이템 효과 대충 만듬 나중에 밸런스 보면서 넣기
 // 아이템 사용
+#pragma region Potion Effects
 void MainItem::HealthPortionEffect()
-{
-	Ccore::GetInst()->LimitHealthUp(5);
-}
+{ Ccore::GetInst()->LimitHealthUp(5); }
 void MainItem::BigHealthPortionEffect()
-{
-	Ccore::GetInst()->LimitHealthUp(5);
-}
+{ Ccore::GetInst()->LimitHealthUp(5); }
 void MainItem::PowerPortionEffect()
-{
-	Ccore::GetInst()->LimitHealthUp(5);
-}
+{ Ccore::GetInst()->LimitHealthUp(5); }
 void MainItem::BigPowerPortionEffect()
-{
-	Ccore::GetInst()->LimitHealthUp(5);
-}
+{ Ccore::GetInst()->LimitHealthUp(5); }
 void MainItem::Potion4Effect()
-{
-	Ccore::GetInst()->LimitHealthUp(5);
-}
+{ Ccore::GetInst()->LimitHealthUp(5); }
 void MainItem::Potion5Effect()
-{
-	Ccore::GetInst()->Newbarrier(5);
-}
+{ Ccore::GetInst()->Newbarrier(5); }
 void MainItem::Potion6Effect()
-{
-	Ccore::GetInst()->Newbarrier(5);
-}
+{ Ccore::GetInst()->Newbarrier(5); }
 void MainItem::Potion7Effect()
-{
-	Ccore::GetInst()->Newbarrier(5);
-}
+{ Ccore::GetInst()->Newbarrier(5); }
 void MainItem::FirePortionEffect()
-{
-	Ccore::GetInst()->Newbarrier(5);
-}
+{ Ccore::GetInst()->Newbarrier(5); }
 void MainItem::BigFirePortionEffect()
-{
-	Ccore::GetInst()->Newbarrier(5);
-}
-// 무기 장착										
+{ Ccore::GetInst()->Newbarrier(5); }
+#pragma endregion
+// 무기 장착
+#pragma region Weapon Effects										
 void MainItem::Weapon1Effect()
-{
-	Ccore::GetInst()->PowerUp(5);
-}
+{ Ccore::GetInst()->AddPowerUp(5); }
 void MainItem::Weapon2Effect()
-{
-	Ccore::GetInst()->PowerUp(5);
-}
+{ Ccore::GetInst()->AddPowerUp(5); }
 void MainItem::Weapon3Effect()
-{
-	Ccore::GetInst()->PowerUp(5);
-}
+{ Ccore::GetInst()->AddPowerUp(5); }
 void MainItem::Weapon4Effect()
-{
-	Ccore::GetInst()->PowerUp(5);
-}
+{ Ccore::GetInst()->AddPowerUp(5); }
 void MainItem::Weapon5Effect()
-{
-	Ccore::GetInst()->PowerUp(5);
-}
+{ Ccore::GetInst()->AddPowerUp(5); }
 void MainItem::Weapon6Effect()
-{
-	Ccore::GetInst()->PowerUp(5);
-}
+{ Ccore::GetInst()->AddPowerUp(5); }
 void MainItem::Weapon7Effect()
-{
-	Ccore::GetInst()->PowerUp(5);
-}
+{ Ccore::GetInst()->AddPowerUp(5); }
 void MainItem::Weapon8Effect()
-{
-	Ccore::GetInst()->PowerUp(5);
-}
+{ Ccore::GetInst()->AddPowerUp(5); }
 void MainItem::Weapon9Effect()
-{
-	Ccore::GetInst()->PowerUp(5);
-}
+{ Ccore::GetInst()->AddPowerUp(5); }
 void MainItem::Weapon10Effect()
-{
-	Ccore::GetInst()->PowerUp(5);
-}
+{ Ccore::GetInst()->AddPowerUp(5); }
+#pragma endregion
 // 장비 장착
+#pragma region Equipment Effects		
 void MainItem::Equipment1Effect()
-{
-	Ccore::GetInst()->DefenseUp(5);
-}
+{ Ccore::GetInst()->AddDefenseUp(5); }
 void MainItem::Equipment2Effect()
-{
-	Ccore::GetInst()->DefenseUp(5);
-}
+{ Ccore::GetInst()->AddDefenseUp(5); }
 void MainItem::Equipment3Effect()
-{
-	Ccore::GetInst()->DefenseUp(5);
-}
+{ Ccore::GetInst()->AddDefenseUp(5); }
 void MainItem::Equipment4Effect()
-{
-	Ccore::GetInst()->DefenseUp(5);
-}
+{ Ccore::GetInst()->AddDefenseUp(5); }
 void MainItem::Equipment5Effect()
-{
-	Ccore::GetInst()->DefenseUp(5);
-}
+{ Ccore::GetInst()->AddDefenseUp(5); }
 void MainItem::Equipment6Effect()
-{
-	Ccore::GetInst()->DefenseUp(5);
-}
+{ Ccore::GetInst()->AddDefenseUp(5); }
 void MainItem::Equipment7Effect()
-{
-	Ccore::GetInst()->DefenseUp(5);
-}
+{ Ccore::GetInst()->AddDefenseUp(5); }
 void MainItem::Equipment8Effect()
-{
-	Ccore::GetInst()->DefenseUp(5);
-}
+{ Ccore::GetInst()->AddDefenseUp(5); }
 void MainItem::Equipment9Effect()
-{
-	Ccore::GetInst()->DefenseUp(5);
-}
+{ Ccore::GetInst()->AddDefenseUp(5); }
 void MainItem::Equipment10Effect()
-{
-	Ccore::GetInst()->DefenseUp(5);
-}
+{ Ccore::GetInst()->AddDefenseUp(5); }
+#pragma endregion
 // 무기 해체
+#pragma region Remove Weapon Effects		
 void MainItem::RemoveWeapon1Effect()
-{
-	Ccore::GetInst()->PowerUp(5);
-}
+{ Ccore::GetInst()->RemovePowerUp(5); }
 void MainItem::RemoveWeapon2Effect()
-{
-	Ccore::GetInst()->PowerUp(5);
-}
+{ Ccore::GetInst()->RemovePowerUp(5); }
 void MainItem::RemoveWeapon3Effect()
-{
-	Ccore::GetInst()->PowerUp(5);
-}
+{ Ccore::GetInst()->RemovePowerUp(5); }
 void MainItem::RemoveWeapon4Effect()
-{
-	Ccore::GetInst()->PowerUp(5);
-}
+{ Ccore::GetInst()->RemovePowerUp(5); }
 void MainItem::RemoveWeapon5Effect()
-{
-	Ccore::GetInst()->PowerUp(5);
-}
+{ Ccore::GetInst()->RemovePowerUp(5); }
 void MainItem::RemoveWeapon6Effect()
-{
-	Ccore::GetInst()->PowerUp(5);
-}
+{ Ccore::GetInst()->RemovePowerUp(5); }
 void MainItem::RemoveWeapon7Effect()
-{
-	Ccore::GetInst()->PowerUp(5);
-}
+{ Ccore::GetInst()->RemovePowerUp(5); }
 void MainItem::RemoveWeapon8Effect()
-{
-	Ccore::GetInst()->PowerUp(5);
-}
+{ Ccore::GetInst()->RemovePowerUp(5); }
 void MainItem::RemoveWeapon9Effect()
-{
-	Ccore::GetInst()->PowerUp(5);
-}
+{ Ccore::GetInst()->RemovePowerUp(5); }
 void MainItem::RemoveWeapon10Effect()
-{
-	Ccore::GetInst()->PowerUp(5);
-}
+{ Ccore::GetInst()->RemovePowerUp(5); }
+#pragma endregion
 // 장비 해체
+#pragma region Remove Equipment Effects	
 void MainItem::RemoveEquipment1Effect()
-{
-	Ccore::GetInst()->DefenseUp(5);
-}
+{ Ccore::GetInst()->RemoveDefenseUp(5); }
 void MainItem::RemoveEquipment2Effect()
-{
-	Ccore::GetInst()->DefenseUp(5);
-}
+{ Ccore::GetInst()->RemoveDefenseUp(5); }
 void MainItem::RemoveEquipment3Effect()
-{
-	Ccore::GetInst()->DefenseUp(5);
-}
+{ Ccore::GetInst()->RemoveDefenseUp(5); }
 void MainItem::RemoveEquipment4Effect()
-{
-	Ccore::GetInst()->DefenseUp(5);
-}
+{ Ccore::GetInst()->RemoveDefenseUp(5); }
 void MainItem::RemoveEquipment5Effect()
-{
-	Ccore::GetInst()->DefenseUp(5);
-}
+{ Ccore::GetInst()->RemoveDefenseUp(5); }
 void MainItem::RemoveEquipment6Effect()
-{
-	Ccore::GetInst()->DefenseUp(5);
-}
+{ Ccore::GetInst()->RemoveDefenseUp(5); }
 void MainItem::RemoveEquipment7Effect()
-{
-	Ccore::GetInst()->DefenseUp(5);
-}
+{ Ccore::GetInst()->RemoveDefenseUp(5); }
 void MainItem::RemoveEquipment8Effect()
-{
-	Ccore::GetInst()->DefenseUp(5);
-}
+{ Ccore::GetInst()->RemoveDefenseUp(5); }
 void MainItem::RemoveEquipment9Effect()
-{
-	Ccore::GetInst()->DefenseUp(5);
-}
+{ Ccore::GetInst()->RemoveDefenseUp(5); }
 void MainItem::RemoveEquipment10Effect()
-{
-	Ccore::GetInst()->DefenseUp(5);
-}
-
-
-
+{ Ccore::GetInst()->RemoveDefenseUp(5); }
+#pragma endregion
 
 MainItem::MainItem()
 	:ItemBag()

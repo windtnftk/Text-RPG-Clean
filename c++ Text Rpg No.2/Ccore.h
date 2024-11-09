@@ -41,12 +41,30 @@ inline DataFile& operator++(DataFile& File) {
 	}
 	return File;
 }
+// 장비 같은 지속효과 관리 다른 계산할떄 항상 포함
+// but 데이터저장시에는 미 포함, 후에 독같은 추가 효과 제공 예정
+struct LastingEffect
+{
+	int		Power;		//지속 공격력 증가량
+	int		Defense;	//지속 방어력 증가량
+	int		Barrier;	//전투함수 중 순간 보호막 효과 발휘
+};
+struct Attribute {
+	enum class AttackType {
+		Blunt,  // 타격
+		Pierce,  // 관통
+		Slash    // 참격
+	};
+
+	AttackType attackType;
+	// 다른 속성이나 변수 추가 가능
+};
 
 struct PlayerData
 {
 	string	PlayerName;	//플레이어 이름
 	int		Level;		//플레이어 레밸, 레벨에 비레해 경험치 흭득양 정해짐
-	int		Power;		//플레이어 힘
+	int		Power;		//플레이어 공격력
 	int		Defense;	//플레이어 방어력
 	int		Health;		//플레이 체력
 	int		Exp;		//플레이어 경험치
@@ -56,8 +74,6 @@ struct PlayerData
 	//기본값은 false, 저장시 true로 변환, DataFileSave함수를 통해 true변환해야됨
 	//오류 발생시에 false값으로 변환됨
 	bool	SaveThis;
-	// 저장데이터로 가지지않고 전투함수 중 순간 보호막 효과 발휘
-	int		Barrier;
 };
 // 컴파일 타임 상수, 레벨업시 현재레벨 과 곱해서 최대 Exp를 만드는 상수값
 constexpr int Multiplier = 20;  
@@ -71,6 +87,7 @@ class Ccore
 	// 예) PlayerInfo의 경험치가 MaxDataInfo에 있는 경험치보다 높아지면 레벨업
 	PlayerData	PlayerInfo; // 플레이어 정보
 	GameMode	ModeCur; // 현재 설정한 모드로 진행
+	LastingEffect lasting;// 지속중인 효과들 계산
 
 
 public:		// 기본 Init관련 함수
@@ -129,7 +146,8 @@ public:		// 레벨업 전담 함수
 	// 이걸로 평균 만들자
 	void	L_Upstatus();
 
-public:		// 전투처리 함수
+	// 전투처리 함수
+public:		
 	// 전투화면으로 진행하는 함수
 	// 반환값을 bool값으로 줄수 있으니까
 	// 플레이어 사망, 각종 이유로 죽으면 false(지금은 PlayerLifeCheck로 확인)
@@ -157,8 +175,20 @@ public:
 	void PowerUp(int test) { PlayerInfo.Power += test; } //PowerUp
 	void DefenseUp(int test) { PlayerInfo.Defense += test; } //DefenseUp
 	void LimitHealthUp(int test); //최대 체력 확인해서 한계치 까지만 회복
-	void Newbarrier(int test);	//방어막 생성
 
+	// 여기서 부터는 지속효과 적용, 장비 장착함수들은 여기를 호출할 예정
+	// 여기서 int값 대신 enum class 만들어서 희귀도에 따라 효과 적용되는 양이
+	// 다르게 만들게 하면 좋을거 같음 ㅇㅇ
+	// 예))1번 무기는 노말 공업, 10번 무기는 전설등급 공업 + 추가효과 이런식으로
+
+	void Newbarrier(int test);//방어막 생성
+	void AddPowerUp(int test);//지속 공격력 생성
+	void AddDefenseUp(int test);//지속 방어력 생성
+	// 지속 효과 제거 (나중에 int대신 enum 넣자), 음수 까지 허용으로 하자
+	void Removebarrier(int test);//방어막 생성
+	void RemovePowerUp(int test);//지속 공격력 생성
+	void RemoveDefenseUp(int test);//지속 방어력 생성
+	
 public:		// 데이터 저장
 
 	// 데이터 저장전 인테페이스 출력

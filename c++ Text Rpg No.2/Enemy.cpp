@@ -2,6 +2,7 @@
 #include "pch.h"
 #include "Enemy.h"
 #include "Ccore.h"
+#include "Attribute.h"
 #include <random>
 
 void EneMy::EnemyInit()
@@ -37,7 +38,7 @@ void EneMy::CreateEnemy(GameMode CurMode)
 		if (line.empty() || line[0] == '#') continue;  // 주석 무시
 
 		std::istringstream ss(line);  // 읽어온 줄을 스트림으로 변환
-		std::string token; E_Info monster;
+		std::string token; E_Info monster; ResistanceLevel AT;
 		getline(ss, monster.E_BInfo.C_Name, ',');
 		getline(ss, token, ','); monster.E_BInfo.C_Level = stoi(token) * (int)CurMode;  // 레벨 읽기
 		getline(ss, token, ','); monster.E_BInfo.C_Power = stoi(token) * (int)CurMode;	// 힘 읽기
@@ -45,7 +46,10 @@ void EneMy::CreateEnemy(GameMode CurMode)
 		getline(ss, token, ','); monster.E_BInfo.C_Exp = stoi(token) * (int)CurMode;	// 경험치 읽기
 		getline(ss, token, ','); monster.E_Plase = std::stoi(token);  // 생존 위치 읽기
 		getline(ss, token, ','); monster.E_Life = std::stoi(token);  // 생존 여부 읽기
-		//monster.E_CurInfo = monster.E_BInfo; // 기본 세팅 값 현재값으로 복사
+		getline(ss, token, ','); monster.attribute.SetRL(AttackType::Blunt, monster.attribute.RLConvert(std::stoi(token))); //타격 초기화
+		getline(ss, token, ','); monster.attribute.SetRL(AttackType::Pierce, monster.attribute.RLConvert(std::stoi(token)));//관통 초기화
+		getline(ss, token, ','); monster.attribute.SetRL(AttackType::Slash, monster.attribute.RLConvert(std::stoi(token))); //참격 초기화
+		getline(ss, token, ','); monster.attribute.My_AT = monster.attribute.ATCovert(std::stoi(token));
 		EneMy::GetInst()->E_BasicInfo.emplace(EidReturn(ID), monster);// 몬스터 정보 저장
 		++ID;
 	}

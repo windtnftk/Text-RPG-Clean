@@ -1,11 +1,12 @@
 #include"pch.h"
+#include "Attribute.h"
 // 일단 다 따로 만들고 상속으로 합쳐보자
 	// 캐릭터 정보를 저장할 class
 	// 몬스터 정보를 저장할 class
 	// 아이템 정보를 저장할 class
 	// 그걸 관리해주는 iterator 만들고 진행
 	// 그걸 모두 상속해서 사용 하자
-
+class Attribute;
 enum class GameMode; // 이런 enum class가 있다고 미리 선언
 enum class EnemyId
 {
@@ -36,6 +37,7 @@ struct E_Info
 	//B_Status		E_CurInfo;// 몬스터 현재값
 	int				E_Plase;//몬스터 생존위치
 	bool			E_Life;//몬스터 생존여부
+	Attribute		attribute;// 적의 특성 정보 (추가)
 };
 struct E_Check
 {
@@ -51,7 +53,7 @@ class EneMy
 public:
 	map<EnemyId, E_Info> E_BasicInfo;//적의 모든정보
 	map<EnemyId, E_Info>::iterator	E_Point; //적 세팅
-
+	//Attribute		E_Type;			//몬스터의 대응타입
 public:		// 설정 및 초기화 함수
 
 	// 정보 초기화

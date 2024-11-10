@@ -4,7 +4,7 @@
 #include "Enemy.h"
 #include "Equipment.h"
 #include "Attribute.h"
-
+#include "Attribute.h"
 void Ccore::Progress()
 {
 	if (!GameOff)// 도는중에 gameOff가 작동하면 바로 끝내도록 함
@@ -22,7 +22,8 @@ void Ccore::Init()
 {
 	if (ModeCur != GameMode::GameEnd)
 	{
-		Ccore::MaxDataInit();
+		ATinit();
+		MaxDataInit();
 		MainItem::GetInst()->ItemInit();
 		EneMy::GetInst()->EnemyInit();
 		//EneMy::GetInst()->ViewEnemy();
@@ -32,6 +33,13 @@ void Ccore::MaxDataInit()
 {
 	MaxDataInfo = PlayerInfo;
 	MaxExpConnect();
+}
+void Ccore::ATinit()
+{
+	PlayerAT.SetRL(AttackType::Blunt, ResistanceLevel::Weak);
+	PlayerAT.SetRL(AttackType::Pierce, ResistanceLevel::Weak);
+	PlayerAT.SetRL(AttackType::Slash, ResistanceLevel::Weak);
+	PlayerAT.My_AT = AttackType::Blunt;
 }
 void Ccore::GameStartSet()
 {

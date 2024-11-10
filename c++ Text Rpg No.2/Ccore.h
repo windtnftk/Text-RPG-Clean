@@ -1,17 +1,15 @@
 #pragma once
-
+#include "Attribute.h"
 struct E_Info;
 struct E_Check;
 struct B_Status;
+class Attribute;
 enum class GameMode
 {
 	GameEnd,
 	Easy,
 	Normal,
 	Hard,
-
-
-
 	End = 10
 };
 enum class DataFile
@@ -65,8 +63,9 @@ struct PlayerData
 	bool	SaveThis;
 };
 // 컴파일 타임 상수, 레벨업시 현재레벨 과 곱해서 최대 Exp를 만드는 상수값
-constexpr int Multiplier = 20;  
+constexpr int Multiplier = 20;
 // Main 설정 진행 장소 
+
 class Ccore
 {
 	friend class EneMy;
@@ -77,8 +76,7 @@ class Ccore
 	PlayerData	PlayerInfo; // 플레이어 정보
 	GameMode	ModeCur; // 현재 설정한 모드로 진행
 	LastingEffect lasting;// 지속중인 효과들 계산
-	Attribute	P_Type;// 플레이어의 방어 타입
-
+	Attribute PlayerAT; // 플레이어의 공,방 타입, MY_AT가 지금 자신의 공격타입
 public:		// 기본 Init관련 함수
 
 	// Main 프로그램이 돌아가는 함수, 일단 여기서 모든 동작 진행하도록 하자
@@ -90,7 +88,8 @@ public:		// 기본 Init관련 함수
 	void	MaxDataInit();
 	// Player 기본정보 Initial 진행 
 	void	P_DataInit() { PlayerInfoLoding(LodingData(DataFile::BasicData)); }
-
+	// PlayerAT 초기화(기본 공격 타격[주먹], 미 장비 [취약]
+	void	ATinit();
 
 public:		//게임 시작부관련함수
 

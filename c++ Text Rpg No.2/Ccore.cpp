@@ -3,6 +3,7 @@
 #include "Item.h"
 #include "Enemy.h"
 #include "Equipment.h"
+#include "Attribute.h"
 
 void Ccore::Progress()
 {
@@ -288,6 +289,7 @@ bool Ccore::EnemyTurn(E_Info Info)
 void Ccore::EnemyAttack(E_Info Info)
 {
 	//if (Info.E_BInfo.C_Health > 0) // 적이 살아야 적이 공격함
+	//P_Type.calculateDamage(Info.E_BInfo.C_Power, );
 	std::cout << Info.E_BInfo.C_Power << "의 피해를 입었습니다." << std::endl;
 	PlayerInfo.Health -= Info.E_BInfo.C_Power;
 }

@@ -17,9 +17,6 @@
     <Filter Include="Object\3. Enemy">
       <UniqueIdentifier>{3fa52727-1d0d-4759-b99e-52f137847a59}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Object\2. Hero">
-      <UniqueIdentifier>{af434b69-b35f-4158-97dc-a0999357a74d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Default">
       <UniqueIdentifier>{f0550d10-b2a1-4f10-99d5-14588414650f}</UniqueIdentifier>
     </Filter>
@@ -28,6 +25,9 @@
     </Filter>
     <Filter Include="Object\4. Item\consumable">
       <UniqueIdentifier>{15fcba93-c21a-4f84-a7e1-97a721c05255}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\2. Attribute">
+      <UniqueIdentifier>{af434b69-b35f-4158-97dc-a0999357a74d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -48,6 +48,9 @@
     <ClCompile Include="Equipment.cpp">
       <Filter>Object\4. Item\consumable</Filter>
     </ClCompile>
+    <ClCompile Include="Attribute.cpp">
+      <Filter>Object\2. Attribute</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -65,6 +68,9 @@
     </ClInclude>
     <ClInclude Include="Equipment.h">
       <Filter>Object\4. Item\consumable</Filter>
+    </ClInclude>
+    <ClInclude Include="Attribute.h">
+      <Filter>Object\2. Attribute</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

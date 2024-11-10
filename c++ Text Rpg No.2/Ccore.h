@@ -49,17 +49,6 @@ struct LastingEffect
 	int		Defense;	//지속 방어력 증가량
 	int		Barrier;	//전투함수 중 순간 보호막 효과 발휘
 };
-struct Attribute {
-	enum class AttackType {
-		Blunt,  // 타격
-		Pierce,  // 관통
-		Slash    // 참격
-	};
-
-	AttackType attackType;
-	// 다른 속성이나 변수 추가 가능
-};
-
 struct PlayerData
 {
 	string	PlayerName;	//플레이어 이름
@@ -88,7 +77,7 @@ class Ccore
 	PlayerData	PlayerInfo; // 플레이어 정보
 	GameMode	ModeCur; // 현재 설정한 모드로 진행
 	LastingEffect lasting;// 지속중인 효과들 계산
-
+	Attribute	P_Type;// 플레이어의 방어 타입
 
 public:		// 기본 Init관련 함수
 

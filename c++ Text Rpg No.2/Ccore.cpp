@@ -225,6 +225,11 @@ void Ccore::L_Upstatus()
 	PlayerInfo.Health = Multiplier * test;
 	MaxDataInit();
 }
+void Ccore::SkillUpCheck()
+{
+	// for문 넣어서 Attack type만큼 순회
+	if( 500 > PD_to_SP())
+}
 E_Check Ccore::BattleStartInit()
 {
 	E_Info test = EneMy::GetInst()->SetEnemyInfo();
@@ -283,10 +288,22 @@ E_Info Ccore::Hitdamage(E_Info Info)
 {
 	if (Info.E_BInfo.C_Health > 0) // 적이 살아야 내가 공격함
 	{
-		std::cout << PlayerInfo.Power << "의 피해를 입혔습니다." << std::endl;
-		Info.E_BInfo.C_Health = Info.E_BInfo.C_Health - PlayerInfo.Power;
+		// 고민 적에게 가한 실제 피해량의 1/10을 경험치로 얻고싶어
+		// 그러면 applydamage를 반환값으로 받아, 그 후 현재 공격 타입만큼 플레이어정보에
+		// 숙련도에 넣어 그 후에 숙련도 업 함수로 체크해 ㅇㅇ
+		applydamage(Info, R_Hitdamage(Info));
+		Damage_to_SPUP(PlayerAT.My_AT,R_Hitdamage(Info));
 	}
 	return Info;
+}
+int Ccore::R_Hitdamage(E_Info Info)
+{
+	return Info.attribute.calculateDamage(PlayerInfo.Power, PlayerAT.My_AT);
+}
+void Ccore::applydamage(E_Info Info, int damage)
+{
+	std::cout << damage << "의 피해를 입혔습니다." << std::endl;
+	Info.E_BInfo.C_Health -= damage;
 }
 bool Ccore::EnemyTurn(E_Info Info)
 {
@@ -296,10 +313,17 @@ bool Ccore::EnemyTurn(E_Info Info)
 }
 void Ccore::EnemyAttack(E_Info Info)
 {
-	//if (Info.E_BInfo.C_Health > 0) // 적이 살아야 적이 공격함
-	//P_Type.calculateDamage(Info.E_BInfo.C_Power, );
-	std::cout << Info.E_BInfo.C_Power << "의 피해를 입었습니다." << std::endl;
-	PlayerInfo.Health -= Info.E_BInfo.C_Power;
+	std::cout << Info.E_BInfo.C_Name << "의 공격 !!!" << std::endl;
+	PlayerHit(R_EnemyDamage(Info));
+}
+int Ccore::R_EnemyDamage(E_Info Info)
+{
+	return PlayerAT.calculateDamage(Info.E_BInfo.C_Power,Info.attribute.My_AT);
+}
+void Ccore::PlayerHit(int damage)
+{
+	std::cout << damage << "의 피해를 입었습니다." << std::endl;
+	PlayerInfo.Health -= damage;
 }
 bool Ccore::PlayerLifeCheck()
 {
@@ -375,12 +399,8 @@ void Ccore::DataFileSave(DataFile Data)
 		std::cerr << "파일을 열 수 없습니다.\n";
 		return;
 	}
-	string CurData = PlayInfoToSting();
-	// 파일에서 데이터를 수정할 위치 계산
 	int lineNumber = convert(Data);  // enum 값에 따라 라인 번호 결정
 	std::string line;
-	int currentLine = 0;
-
 	// 임시 파일에 데이터 복사 및 수정
 	std::ofstream tempFile("temp.txt");
 	if (!tempFile.is_open()) {
@@ -388,16 +408,14 @@ void Ccore::DataFileSave(DataFile Data)
 		file.close();
 		return;
 	}
-
+	std::string check = std::to_string(lineNumber);
 	while (std::getline(file, line)) {
-		if (currentLine == lineNumber + 4) {
-			tempFile << lineNumber << "%" << CurData << "\n";
-			// 현재 데이터를 해당 라인에 저장
-		}
-		else {
+		if (line.empty() || line[0] == '#' || line[0] != check[0])
+		{
 			tempFile << line << "\n";  // 기존의 다른 라인은 그대로 유지
+			continue;
 		}
-		currentLine++;
+		tempFile << lineNumber << "%" << PlayInfoToSting() << "\n";// 현재 데이터를 해당 라인에 저장
 	}
 	// 파일 정리
 	file.close();
@@ -411,6 +429,7 @@ void Ccore::DataFileSave(DataFile Data)
 		std::cerr << "임시 파일을 원본 파일로 이름 변경하는 중 오류가 발생했습니다.\n";
 	}
 	std::cout << "데이터가 저장되었습니다 (슬롯: " << lineNumber << ").\n";
+	
 }
 bool Ccore::SaveDataLoding()
 {
@@ -467,6 +486,9 @@ PlayerData Ccore::DataFileView(PlayerData data)
 		std::cout << "플레이어 경험치 보유량: " << data.Exp << std::endl;
 		std::cout << "플레이어 소지금: " << data.Money << std::endl;
 		std::cout << "플레이어 진행중인 스테이지: " << data.CurStage << std::endl;
+		std::cout << "플레이어의 타격 숙련도: " << PD_to_SL(data,AttackType::Blunt) << std::endl;
+		std::cout << "플레이어의 관통 숙련도: " << PD_to_SL(data, AttackType::Pierce) << std::endl;
+		std::cout << "플레이어의 참격 숙련도: " << PD_to_SL(data, AttackType::Slash) << std::endl;
 		return data;
 	}
 	else
@@ -475,18 +497,29 @@ PlayerData Ccore::DataFileView(PlayerData data)
 		return data;
 	}
 }
+string Ccore::PlayInfoToSting() {
+	std::ostringstream oss;
 
-string Ccore::PlayInfoToSting()
-{
-	return PlayerInfo.PlayerName
-		+ ", " + std::to_string(PlayerInfo.Level)
-		+ ", " + std::to_string(PlayerInfo.Power)
-		+ ", " + std::to_string(PlayerInfo.Defense)
-		+ ", " + std::to_string(PlayerInfo.Health)
-		+ ", " + std::to_string(PlayerInfo.Exp)
-		+ ", " + std::to_string(PlayerInfo.Money)
-		+ ", " + std::to_string(PlayerInfo.CurStage)
-		+ "$ " + std::to_string(1) + "!";
+	// 1. 첫 번째 줄: 기본 정보
+	oss <<  "\t" << PlayerInfo.PlayerName << ", "
+		<< PlayerInfo.Level << ", "
+		<< PlayerInfo.Power << ", "
+		<< PlayerInfo.Defense << ", "
+		<< PlayerInfo.Health << ", "
+		<< PlayerInfo.Exp << ", "
+		<< PlayerInfo.Money << ", "
+		<< PlayerInfo.CurStage << "$ "
+		<< PlayerInfo.SaveThis << "!\n";
+
+	// 2. 두 번째 줄: 스킬 정보
+	oss << "#\t";
+	for (auto q : PlayerInfo.skills)
+	{
+		oss << q.second.S_Level << ", "
+			<< q.second.S_Point << ", ";
+	}
+
+	return oss.str();
 }
 PlayerData Ccore::LodingData(DataFile dataFile)
 {
@@ -499,12 +532,14 @@ PlayerData Ccore::LodingData(DataFile dataFile)
 		Data.SaveThis = false;
 		return Data;
 	}
-	while (std::getline(inputFile, line)) {
+	while (getline(inputFile, line)) 
+	{
 		if (line.empty() || line[0] == '#' || line[0] != check[0]) continue;
 		// 주석, 맞지 않는 값 무시
 
 		std::istringstream ss(line);  // 읽어온 줄을 스트림으로 변환
 		std::string token;
+		line.erase(std::remove(line.begin(), line.end(), '\t'), line.end());//tap Line 삭제
 		getline(ss, token, '%'); getline(ss, Data.PlayerName, ','); // 이름 읽기
 		getline(ss, token, ','); Data.Level = stoi(token);  // 레벨 읽기
 		getline(ss, token, ','); Data.Power = stoi(token);	// 힘 읽기
@@ -514,7 +549,16 @@ PlayerData Ccore::LodingData(DataFile dataFile)
 		getline(ss, token, ','); Data.Money = std::stoi(token);  // 돈 읽기
 		getline(ss, token, '$'); Data.CurStage = std::stoi(token);  // 진행도 읽기
 		getline(ss, token, '!'); Data.SaveThis = std::stoi(token);  // 오류 검출
+		getline(inputFile, line); std::istringstream sss(line);  // 읽어온 줄을 스트림으로 변환
+		line.erase(std::remove(line.begin(), line.end(), '\t'), line.end());//tap Line 삭제
+		getline(sss, token, '#');
+		for(auto q: Data.skills)
+		{
+			getline(sss, token, ','); q.second.S_Level = std::stoi(token);
+			getline(sss, token, ','); q.second.S_Point = std::stoi(token);
+		}
 	}
+
 	inputFile.close();
 	return Data;
 }
@@ -563,6 +607,8 @@ Ccore::Ccore()
 	, PlayerInfo{}
 	, ModeCur(GameMode::Normal)
 	, lasting{}
+	, PlayerAT{}
+	//skills{ {AttackType::Blunt,{0,0}},{AttackType::Pierce,{0,0}},{AttackType::Slash,{0,0}}}
 {
 }
 Ccore::~Ccore()

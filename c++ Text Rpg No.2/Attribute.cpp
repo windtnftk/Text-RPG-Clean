@@ -4,8 +4,6 @@
 
 
 // 데미지 계산 함수
-// int는 가해자의 공격력, AttackType은 가해자의 공격타입
-// 출력값으로 현재 클래스변수 선언한 Type 계산값을 출력함
 int Attribute::calculateDamage(int baseDamage, AttackType attackType) const
 {
     auto it = resistanceLevels.find(attackType);

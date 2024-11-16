@@ -24,6 +24,8 @@ public:
    
     AttackType  My_AT; //자기 자신의 공격타입
     // 데미지 계산 함수
+    // int는 가해자의 공격력, AttackType은 가해자의 공격타입
+    // 출력값으로 현재 클래스변수 선언한 Type 계산값을 출력함
     int calculateDamage(int baseDamage, AttackType attackType) const;
 
     // 공격 타입별 저항 레벨 설정 함수

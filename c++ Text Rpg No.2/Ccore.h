@@ -29,15 +29,29 @@ enum class DataFile
 };
 // ++연산자 오버로딩, DataFile이 입력되면 다음 File로 이동하는 함수
 // DataFile8이 들어오면 오류문구 출력후 그대로 반환함
-inline DataFile& operator++(DataFile& File) {
-	if (File == DataFile::BasicData) {
-		std::cout << "DataFile의 한계에 도달했습니다." << std::endl;
-		return File;
+//inline DataFile& operator++(DataFile& File) {
+//	if (File == DataFile::BasicData) {
+//		std::cout << "DataFile의 한계에 도달했습니다." << std::endl;
+//		return File;
+//	}
+//	else {
+//		File = static_cast<DataFile>(static_cast<int>(File) + 1);
+//	}
+//	return File;
+//}
+template <typename T>
+inline T& operator++(T& value) {
+	static_assert(std::is_enum<T>::value, "T must be an enum type");
+
+	// Enum의 마지막 값 처리 예시
+	if (value == T::End) {
+		std::cout << "Enum reached its end." << std::endl;
+		return value;
 	}
-	else {
-		File = static_cast<DataFile>(static_cast<int>(File) + 1);
-	}
-	return File;
+
+	// Enum 증가
+	value = static_cast<T>(static_cast<int>(value) + 1);
+	return value;
 }
 // 장비 같은 지속효과 관리 다른 계산할떄 항상 포함
 // but 데이터저장시에는 미 포함, 후에 독같은 추가 효과 제공 예정
@@ -69,6 +83,7 @@ struct PlayerData
 	bool	SaveThis;
 };
 // 컴파일 타임 상수, 레벨업시 현재레벨 과 곱해서 최대 Exp를 만드는 상수값
+// 그리고 숙련도의 최대치
 constexpr int Multiplier = 20;
 // Main 설정 진행 장소 
 
@@ -143,6 +158,10 @@ public:		// 레벨업 전담 함수
 	void	L_Upstatus();
 	//	적과 싸운 후 얻은 숙련도 적용
 	void	SkillUpCheck();
+	// 숙련도가 높을경우 숙련도 레벨업 적용
+	// 경험치상한만큼 빼고 레벨업 하는 함수
+	void	SU_Practice(S_Level& skill, int expCut);
+
 	// 전투처리 함수
 public:		
 	// 전투화면으로 진행하는 함수
@@ -156,8 +175,11 @@ public:
 	// 적이 피해받는 함수, 플레이어 공격력 만큼만 데미지 받음
 	// 추후에 다른 계산 필요(공격 속성추가 완료,추가 할사항 추후에)
 	E_Info Hitdamage(E_Info Info);
-	// 적에게 들어갈 데미지를 출력
+	// 적에게 들어갈 True 데미지를 출력
 	int R_Hitdamage(E_Info Info);
+	// 숙련 레벨에 따른 추가 데미지 계산
+	// 플레이어 데미지 확인
+	int SL_Damage();
 	// 적에게 데미지 적용하는 함수
 	void applydamage(E_Info Info, int damage);
 
@@ -255,6 +277,8 @@ public:		// 변환함수
 	{
 		PlayerInfo.skills.find(type)->second.S_Point += Damage;
 	}
+	
+
 
 };
 

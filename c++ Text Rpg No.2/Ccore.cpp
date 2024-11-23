@@ -187,7 +187,7 @@ void Ccore::NextStage()
 void Ccore::RewardCheck(B_Status Reward)
 {
 	RewardExp(Reward);
-
+	SkillUpCheck();
 }
 void Ccore::RewardExp(B_Status Reward)
 {
@@ -227,8 +227,21 @@ void Ccore::L_Upstatus()
 }
 void Ccore::SkillUpCheck()
 {
+	int expCut = 500;
 	// for문 넣어서 Attack type만큼 순회
-	if( 500 > PD_to_SP())
+	for (AttackType i = AttackType::Blunt; i < AttackType::End; ++i)
+	{
+		auto& skill = PlayerInfo.skills[i];
+		while (skill.S_Point >= expCut || skill.S_Level < Multiplier)
+		{
+			SU_Practice(skill, expCut);
+		}
+	}
+}
+void Ccore::SU_Practice(S_Level& skill, int expCut)
+{
+	skill.S_Point -= expCut;
+	skill.S_Level++;
 }
 E_Check Ccore::BattleStartInit()
 {
@@ -288,11 +301,8 @@ E_Info Ccore::Hitdamage(E_Info Info)
 {
 	if (Info.E_BInfo.C_Health > 0) // 적이 살아야 내가 공격함
 	{
-		// 고민 적에게 가한 실제 피해량의 1/10을 경험치로 얻고싶어
-		// 그러면 applydamage를 반환값으로 받아, 그 후 현재 공격 타입만큼 플레이어정보에
-		// 숙련도에 넣어 그 후에 숙련도 업 함수로 체크해 ㅇㅇ
 		applydamage(Info, R_Hitdamage(Info));
-		Damage_to_SPUP(PlayerAT.My_AT,R_Hitdamage(Info));
+		Damage_to_SPUP(PlayerAT.My_AT, R_Hitdamage(Info));
 	}
 	return Info;
 }
@@ -318,7 +328,7 @@ void Ccore::EnemyAttack(E_Info Info)
 }
 int Ccore::R_EnemyDamage(E_Info Info)
 {
-	return PlayerAT.calculateDamage(Info.E_BInfo.C_Power,Info.attribute.My_AT);
+	return PlayerAT.calculateDamage(Info.E_BInfo.C_Power, Info.attribute.My_AT);
 }
 void Ccore::PlayerHit(int damage)
 {
@@ -429,7 +439,7 @@ void Ccore::DataFileSave(DataFile Data)
 		std::cerr << "임시 파일을 원본 파일로 이름 변경하는 중 오류가 발생했습니다.\n";
 	}
 	std::cout << "데이터가 저장되었습니다 (슬롯: " << lineNumber << ").\n";
-	
+
 }
 bool Ccore::SaveDataLoding()
 {
@@ -486,7 +496,7 @@ PlayerData Ccore::DataFileView(PlayerData data)
 		std::cout << "플레이어 경험치 보유량: " << data.Exp << std::endl;
 		std::cout << "플레이어 소지금: " << data.Money << std::endl;
 		std::cout << "플레이어 진행중인 스테이지: " << data.CurStage << std::endl;
-		std::cout << "플레이어의 타격 숙련도: " << PD_to_SL(data,AttackType::Blunt) << std::endl;
+		std::cout << "플레이어의 타격 숙련도: " << PD_to_SL(data, AttackType::Blunt) << std::endl;
 		std::cout << "플레이어의 관통 숙련도: " << PD_to_SL(data, AttackType::Pierce) << std::endl;
 		std::cout << "플레이어의 참격 숙련도: " << PD_to_SL(data, AttackType::Slash) << std::endl;
 		return data;
@@ -501,7 +511,7 @@ string Ccore::PlayInfoToSting() {
 	std::ostringstream oss;
 
 	// 1. 첫 번째 줄: 기본 정보
-	oss <<  "\t" << PlayerInfo.PlayerName << ", "
+	oss << "\t" << PlayerInfo.PlayerName << ", "
 		<< PlayerInfo.Level << ", "
 		<< PlayerInfo.Power << ", "
 		<< PlayerInfo.Defense << ", "
@@ -532,7 +542,7 @@ PlayerData Ccore::LodingData(DataFile dataFile)
 		Data.SaveThis = false;
 		return Data;
 	}
-	while (getline(inputFile, line)) 
+	while (getline(inputFile, line))
 	{
 		if (line.empty() || line[0] == '#' || line[0] != check[0]) continue;
 		// 주석, 맞지 않는 값 무시
@@ -552,7 +562,7 @@ PlayerData Ccore::LodingData(DataFile dataFile)
 		getline(inputFile, line); std::istringstream sss(line);  // 읽어온 줄을 스트림으로 변환
 		line.erase(std::remove(line.begin(), line.end(), '\t'), line.end());//tap Line 삭제
 		getline(sss, token, '#');
-		for(auto q: Data.skills)
+		for (auto q : Data.skills)
 		{
 			getline(sss, token, ','); q.second.S_Level = std::stoi(token);
 			getline(sss, token, ','); q.second.S_Point = std::stoi(token);

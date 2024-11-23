@@ -2,22 +2,34 @@
 #include "Attribute.h"
 
 
-
 // 데미지 계산 함수
 int Attribute::calculateDamage(int baseDamage, AttackType attackType) const
 {
     auto it = resistanceLevels.find(attackType);
     if (it != resistanceLevels.end()) {
-        int multiplier = static_cast<int>(it->second);
+        SLDamage(baseDamage,it->second );
+        int multiplier = static_cast<int>(it->second.MY_RL);
         return (baseDamage * multiplier) / 100;
     }
     return baseDamage; // 기본 데미지
 }
-
+int Attribute::SLDamage(int base, const Main_AT& type) const
+{
+    
+    return 0;
+}
 // 저항 레벨 설정 함수
 void Attribute::SetRL(AttackType type, ResistanceLevel level) 
 {
-    resistanceLevels[type] = level;
+    resistanceLevels[type].MY_RL = level;
+}
+int Attribute::AT_to_ATL(AttackType type)
+{
+    return resistanceLevels[type].S_Level;
+}
+int Attribute::AT_to_ATE(AttackType type)
+{
+    return resistanceLevels[type].S_EXP;
 }
 int Attribute::RLConvert(ResistanceLevel R_L)
 {
@@ -55,7 +67,7 @@ ResistanceLevel Attribute::RLConvert(int Data)
     }
     return static_cast<ResistanceLevel>(Data);
 }
-AttackType Attribute::ATCovert(int Data)
+AttackType Attribute::ATConvert(int Data)
 {
     if (Data > 2)
     {
@@ -68,9 +80,9 @@ AttackType Attribute::ATCovert(int Data)
 Attribute::Attribute()
     :My_AT(AttackType::Blunt)
 {
-    resistanceLevels[AttackType::Blunt] = ResistanceLevel::Normal;
-    resistanceLevels[AttackType::Pierce] = ResistanceLevel::Normal;
-    resistanceLevels[AttackType::Slash] = ResistanceLevel::Normal;
+    resistanceLevels[AttackType::Blunt] = { ResistanceLevel::Normal,1,0};
+    resistanceLevels[AttackType::Pierce] = { ResistanceLevel::Normal,1,0 };
+    resistanceLevels[AttackType::Slash] = { ResistanceLevel::Normal,1,0 };
 }
 
 Attribute::~Attribute()

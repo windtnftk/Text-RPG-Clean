@@ -39,6 +39,8 @@ enum class DataFile
 //	}
 //	return File;
 //}
+
+// TODO: 나중에 파일 enum 파일 입력시 End값이 아니라 다른걸로 확인
 template <typename T>
 inline T& operator++(T& value) {
 	static_assert(std::is_enum<T>::value, "T must be an enum type");
@@ -76,7 +78,8 @@ struct PlayerData
 	int		Exp;		//플레이어 경험치
 	int		Money;		//플레이어 돈
 	int		CurStage;	//플레이어가 진행한 스테이지 위치
-	std::unordered_map<AttackType, S_Level> skills; // 타격/관통/참격 숙련도 및 숙련치
+	//std::unordered_map<AttackType, S_Level> AT_DATA; // 타격/관통/참격 숙련도 및 숙련치
+	Attribute AT_DATA;
 	//Data File에 저장을 실행했는지 확인하는 변수 
 	//기본값은 false, 저장시 true로 변환, DataFileSave함수를 통해 true변환해야됨
 	//오류 발생시에 false값으로 변환됨
@@ -97,8 +100,8 @@ class Ccore
 	PlayerData	PlayerInfo; // 플레이어 정보
 	GameMode	ModeCur; // 현재 설정한 모드로 진행
 	LastingEffect lasting;// 지속중인 효과들 계산
-	Attribute PlayerAT; // 플레이어의 공,방 타입, MY_AT가 지금 자신의 공격타입
-	//std::unordered_map<AttackType, S_Level> skills; // 타격/관통/참격 숙련도 및 숙련치
+	//Attribute PlayerAT; // 플레이어의 공,방 타입, MY_AT가 지금 자신의 공격타입
+	//std::unordered_map<AttackType, S_Level> AT_DATA; // 타격/관통/참격 숙련도 및 숙련치
 public:		// 기본 Init관련 함수
 
 	// Main 프로그램이 돌아가는 함수, 일단 여기서 모든 동작 진행하도록 하자
@@ -156,11 +159,7 @@ public:		// 레벨업 전담 함수
 	// 레벨업 후 조정작업
 	// 이걸로 평균 만들자
 	void	L_Upstatus();
-	//	적과 싸운 후 얻은 숙련도 적용
-	void	SkillUpCheck();
-	// 숙련도가 높을경우 숙련도 레벨업 적용
-	// 경험치상한만큼 빼고 레벨업 하는 함수
-	void	SU_Practice(S_Level& skill, int expCut);
+	
 
 	// 전투처리 함수
 public:		
@@ -174,13 +173,10 @@ public:
 	void	PlayerInfoView();
 	// 적이 피해받는 함수, 플레이어 공격력 만큼만 데미지 받음
 	// 추후에 다른 계산 필요(공격 속성추가 완료,추가 할사항 추후에)
-	E_Info Hitdamage(E_Info Info);
+	int Hitdamage(E_Info Info);
 	// 적에게 들어갈 True 데미지를 출력
 	int R_Hitdamage(E_Info Info);
-	// 숙련 레벨에 따른 추가 데미지 계산
-	// 플레이어 데미지 확인
-	int SL_Damage();
-	// 적에게 데미지 적용하는 함수
+	// 적에게 데미지 
 	void applydamage(E_Info Info, int damage);
 
 	// 적 턴 함수
@@ -264,19 +260,19 @@ public:		// 변환함수
 	int convert(DataFile dataFile) {
 		return static_cast<int>(dataFile);
 	}
-	// PlayerData와 AttactType을 입력하면 숙련도 반환
-	int PD_to_SL(PlayerData Info, AttackType type)
-	{return Info.skills.find(type)->second.S_Level;}
-	// PlayerData와 AttactType을 입력하면 숙련 경험치 반환
-	int PD_to_SP(PlayerData Info, AttackType type)
-	{
-		return Info.skills.find(type)->second.S_Point;
-	}
-	// 적에게 준 피해량 만큼 경험치 얻는 함수
-	void Damage_to_SPUP(AttackType type, int Damage)
-	{
-		PlayerInfo.skills.find(type)->second.S_Point += Damage;
-	}
+	//// PlayerData와 AttactType을 입력하면 숙련도 반환
+	//int PD_to_SL(PlayerData Info, AttackType type)
+	//{return Info.AT_DATA.find(type)->second.S_Level;}
+	//// PlayerData와 AttactType을 입력하면 숙련 경험치 반환
+	//int PD_to_SP(PlayerData Info, AttackType type)
+	//{
+	//	return Info.AT_DATA.find(type)->second.S_Point;
+	//}
+	//// 적에게 준 피해량 만큼 경험치 얻는 함수
+	//void Damage_to_SPUP(AttackType type, int Damage)
+	//{
+	//	PlayerInfo.AT_DATA.find(type)->second.S_Point += Damage;
+	//}
 	
 
 

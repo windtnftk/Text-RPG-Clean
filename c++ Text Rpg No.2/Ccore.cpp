@@ -4,7 +4,7 @@
 #include "Enemy.h"
 #include "Equipment.h"
 #include "Attribute.h"
-#include "Attribute.h"
+
 void Ccore::Progress()
 {
 	if (!GameOff)// 도는중에 gameOff가 작동하면 바로 끝내도록 함
@@ -36,10 +36,10 @@ void Ccore::MaxDataInit()
 }
 void Ccore::ATinit()
 {
-	PlayerAT.SetRL(AttackType::Blunt, ResistanceLevel::Weak);
-	PlayerAT.SetRL(AttackType::Pierce, ResistanceLevel::Weak);
-	PlayerAT.SetRL(AttackType::Slash, ResistanceLevel::Weak);
-	PlayerAT.My_AT = AttackType::Blunt;
+	PlayerInfo.AT_DATA.SetRL(AttackType::Blunt, Resistance::Weak);
+	PlayerInfo.AT_DATA.SetRL(AttackType::Pierce, Resistance::Weak);
+	PlayerInfo.AT_DATA.SetRL(AttackType::Slash, Resistance::Weak);
+	PlayerInfo.AT_DATA.My_AT = AttackType::Blunt;
 }
 void Ccore::GameStartSet()
 {
@@ -187,7 +187,7 @@ void Ccore::NextStage()
 void Ccore::RewardCheck(B_Status Reward)
 {
 	RewardExp(Reward);
-	SkillUpCheck();
+	PlayerInfo.AT_DATA.SkillUpCheck();
 }
 void Ccore::RewardExp(B_Status Reward)
 {
@@ -225,24 +225,6 @@ void Ccore::L_Upstatus()
 	PlayerInfo.Health = Multiplier * test;
 	MaxDataInit();
 }
-void Ccore::SkillUpCheck()
-{
-	int expCut = 500;
-	// for문 넣어서 Attack type만큼 순회
-	for (AttackType i = AttackType::Blunt; i < AttackType::End; ++i)
-	{
-		auto& skill = PlayerInfo.skills[i];
-		while (skill.S_Point >= expCut || skill.S_Level < Multiplier)
-		{
-			SU_Practice(skill, expCut);
-		}
-	}
-}
-void Ccore::SU_Practice(S_Level& skill, int expCut)
-{
-	skill.S_Point -= expCut;
-	skill.S_Level++;
-}
 E_Check Ccore::BattleStartInit()
 {
 	E_Info test = EneMy::GetInst()->SetEnemyInfo();
@@ -259,7 +241,7 @@ E_Check Ccore::BattleStartInit()
 			switch (CinAuto())
 			{
 			case 1:
-				test = Hitdamage(test);
+				test.E_BInfo.C_Health -= Hitdamage(test);
 				End = false;
 				break;
 			case 2:
@@ -297,18 +279,18 @@ void Ccore::PlayerInfoView()
 	std::cout << "현재 경험치: " << PlayerInfo.Exp << std::endl;
 	std::cout << "필요 경험치: " << MaxDataInfo.Exp << std::endl;
 }
-E_Info Ccore::Hitdamage(E_Info Info)
+int Ccore::Hitdamage(E_Info Info)
 {
-	if (Info.E_BInfo.C_Health > 0) // 적이 살아야 내가 공격함
-	{
-		applydamage(Info, R_Hitdamage(Info));
-		Damage_to_SPUP(PlayerAT.My_AT, R_Hitdamage(Info));
-	}
-	return Info;
+	if (Info.E_BInfo.C_Health < 0) return 0;// 적이 살아야 내가 공격함
+
+	int data = R_Hitdamage(Info);
+	std::cout << data << "의 피해를 입혔습니다." << std::endl;
+	PlayerInfo.AT_DATA.Damage_to_SPUP(data);
+	return data;
 }
 int Ccore::R_Hitdamage(E_Info Info)
 {
-	return Info.attribute.calculateDamage(PlayerInfo.Power, PlayerAT.My_AT);
+	return Info.attribute.calculateDamage(PlayerInfo.Power, Info.attribute.My_AT);
 }
 void Ccore::applydamage(E_Info Info, int damage)
 {
@@ -328,7 +310,7 @@ void Ccore::EnemyAttack(E_Info Info)
 }
 int Ccore::R_EnemyDamage(E_Info Info)
 {
-	return PlayerAT.calculateDamage(Info.E_BInfo.C_Power, Info.attribute.My_AT);
+	return PlayerInfo.AT_DATA.calculateDamage(Info.E_BInfo.C_Power, Info.attribute.My_AT);
 }
 void Ccore::PlayerHit(int damage)
 {
@@ -496,9 +478,9 @@ PlayerData Ccore::DataFileView(PlayerData data)
 		std::cout << "플레이어 경험치 보유량: " << data.Exp << std::endl;
 		std::cout << "플레이어 소지금: " << data.Money << std::endl;
 		std::cout << "플레이어 진행중인 스테이지: " << data.CurStage << std::endl;
-		std::cout << "플레이어의 타격 숙련도: " << PD_to_SL(data, AttackType::Blunt) << std::endl;
-		std::cout << "플레이어의 관통 숙련도: " << PD_to_SL(data, AttackType::Pierce) << std::endl;
-		std::cout << "플레이어의 참격 숙련도: " << PD_to_SL(data, AttackType::Slash) << std::endl;
+		std::cout << "플레이어의 타격 숙련도: " << data.AT_DATA.AT_to_ATL(AttackType::Blunt) << std::endl;
+		std::cout << "플레이어의 관통 숙련도: " << data.AT_DATA.AT_to_ATL(AttackType::Pierce) << std::endl;
+		std::cout << "플레이어의 참격 숙련도: " << data.AT_DATA.AT_to_ATL(AttackType::Slash) << std::endl;
 		return data;
 	}
 	else
@@ -523,10 +505,10 @@ string Ccore::PlayInfoToSting() {
 
 	// 2. 두 번째 줄: 스킬 정보
 	oss << "#\t";
-	for (auto q : PlayerInfo.skills)
+	for (auto q : PlayerInfo.AT_DATA.getAttackTypes())
 	{
-		oss << q.second.S_Level << ", "
-			<< q.second.S_Point << ", ";
+		oss << PlayerInfo.AT_DATA.AT_to_ATL(q) << ", "
+			<< PlayerInfo.AT_DATA.AT_to_ATE(q) << ", ";
 	}
 
 	return oss.str();
@@ -562,10 +544,11 @@ PlayerData Ccore::LodingData(DataFile dataFile)
 		getline(inputFile, line); std::istringstream sss(line);  // 읽어온 줄을 스트림으로 변환
 		line.erase(std::remove(line.begin(), line.end(), '\t'), line.end());//tap Line 삭제
 		getline(sss, token, '#');
-		for (auto q : Data.skills)
+		;
+		for (auto q : Data.AT_DATA.getAttackTypes())
 		{
-			getline(sss, token, ','); q.second.S_Level = std::stoi(token);
-			getline(sss, token, ','); q.second.S_Point = std::stoi(token);
+			getline(sss, token, ','); Data.AT_DATA.Set_SL(q, std::stoi(token));
+			getline(sss, token, ','); Data.AT_DATA.Set_SE(q, std::stoi(token));
 		}
 	}
 
@@ -617,8 +600,7 @@ Ccore::Ccore()
 	, PlayerInfo{}
 	, ModeCur(GameMode::Normal)
 	, lasting{}
-	, PlayerAT{}
-	//skills{ {AttackType::Blunt,{0,0}},{AttackType::Pierce,{0,0}},{AttackType::Slash,{0,0}}}
+	//AT_DATA{ {AttackType::Blunt,{0,0}},{AttackType::Pierce,{0,0}},{AttackType::Slash,{0,0}}}
 {
 }
 Ccore::~Ccore()

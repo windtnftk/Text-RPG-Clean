@@ -132,7 +132,7 @@ void MainItem::TotalequippedItems()
 {
 	if (!ViewEquippedItems())return;
 	std::cout << "장비를 해체하시겠습니까?" << std::endl;
-	if (!Yes_No) return;
+	if (!Yes_No()) return;
 	std::cout << "어떤장비를 해체하시겠습니까?" << std::endl;
 	MoveEquipped(CinAuto());
 	
@@ -151,6 +151,7 @@ bool MainItem::ViewEquippedItems()
 		auto it = static_cast<int>(q);
 		std::cout <<"1. " << std::endl << ItemArr[it] << ", " << std::endl;
 	}
+	return true;
 }
 void MainItem::MoveEquipped(int choice)
 {

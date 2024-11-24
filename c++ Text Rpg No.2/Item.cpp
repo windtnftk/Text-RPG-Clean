@@ -402,6 +402,5 @@ MainItem::MainItem()
 {}
 MainItem::~MainItem()
 {
-	delete& ItemBag;
-	delete& handleItem;
+	ItemBag.clear();
 }

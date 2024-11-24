@@ -74,11 +74,11 @@ AttackType Attribute::ATConvert(int Data)
     }
     return static_cast<AttackType>(Data);
 }
-void Attribute::Set_SL(AttackType type, int Data)
+void Attribute::Set_SE(AttackType type, int Data)
 {
     T_MAP[type].S_EXP = Data;
 }
-void Attribute::Set_SE(AttackType type, int Data)
+void Attribute::Set_SL(AttackType type, int Data)
 {
     T_MAP[type].S_Level = Data;
 }
@@ -110,4 +110,5 @@ Attribute::Attribute()
 
 Attribute::~Attribute()
 {
+    T_MAP.clear();
 }

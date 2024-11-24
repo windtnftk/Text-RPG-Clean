@@ -16,9 +16,9 @@ void EneMy::EnemyInit()
 	int rendom = distribution(gen) % 10;
 	*/
 
-	EneMy::GetInst()->CreateEnemy(Ccore::GetInst()->ModeCur);
+	CreateEnemy(Ccore::GetInst()->ModeCur);
 
-	EneMy::GetInst()->E_Point = EneMy::GetInst()->E_BasicInfo.begin();
+	E_Point = E_BasicInfo.begin();
 }
 void EneMy::CreateEnemy(GameMode CurMode)
 {
@@ -50,7 +50,11 @@ void EneMy::CreateEnemy(GameMode CurMode)
 		getline(ss, token, ','); monster.attribute.SetRL(AttackType::Pierce, monster.attribute.RLConvert(std::stoi(token)));//관통 초기화
 		getline(ss, token, ','); monster.attribute.SetRL(AttackType::Slash, monster.attribute.RLConvert(std::stoi(token))); //참격 초기화
 		getline(ss, token, ','); monster.attribute.My_AT = monster.attribute.ATConvert(std::stoi(token));
-		EneMy::GetInst()->E_BasicInfo.emplace(EidReturn(ID), monster);// 몬스터 정보 저장
+		monster.attribute.Set_SL(AttackType::Blunt, 1);
+		monster.attribute.Set_SL(AttackType::Pierce, 1);
+		monster.attribute.Set_SL(AttackType::Slash, 1);
+		// TODO: 적 생성시 공격타입 숙련도 체크부 1로 고정함, 추후에 수정 예정
+		E_BasicInfo.emplace(EidReturn(ID), monster);// 몬스터 정보 저장
 		++ID;
 	}
 
@@ -77,7 +81,7 @@ void EneMy::ViewEnemy()
 }
 void EneMy::printEnemyBaseInfo(EnemyId data)
 {
-	auto it = EneMy::GetInst()->E_BasicInfo.find(data);
+	auto it = E_BasicInfo.find(data);
 	std::cout << "Name: " << it->second.E_BInfo.C_Name << std::endl;
 	std::cout << "Level: " << it->second.E_BInfo.C_Level << std::endl;
 	std::cout << "Power: " << it->second.E_BInfo.C_Power << std::endl;
@@ -206,5 +210,5 @@ EneMy::EneMy()
 }
 EneMy::~EneMy()
 {
-
+	E_BasicInfo.clear();
 }

@@ -181,7 +181,7 @@ void Ccore::BattleAfter(E_Check Info)
 void Ccore::NextStage()
 {
 	++PlayerInfo.CurStage;
-	++MaxDataInfo.CurStage;
+	++MaxDataInfo.CurStage; // TODO: CurStage을 올리지 않고 최대 스테이지 수를 정해주는게 나을듯
 	++EneMy::GetInst()->E_Point;
 }
 void Ccore::RewardCheck(B_Status Reward)
@@ -321,6 +321,7 @@ bool Ccore::PlayerLifeCheck()
 {
 	if (PlayerInfo.Health < 0)
 	{
+		GameOver();
 		//std::cout << "플레이어가 죽었습니다." << std::endl;
 		return false;
 	}

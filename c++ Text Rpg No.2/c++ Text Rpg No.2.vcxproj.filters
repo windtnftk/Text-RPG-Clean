@@ -29,6 +29,9 @@
     <Filter Include="Object\2. Attribute">
       <UniqueIdentifier>{af434b69-b35f-4158-97dc-a0999357a74d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Dungeon">
+      <UniqueIdentifier>{6fdf2bd0-9a5b-4353-95a6-76cc3cedb976}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
@@ -51,6 +54,9 @@
     <ClCompile Include="Attribute.cpp">
       <Filter>Object\2. Attribute</Filter>
     </ClCompile>
+    <ClCompile Include="Dungeon.cpp">
+      <Filter>Dungeon</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -71,6 +77,9 @@
     </ClInclude>
     <ClInclude Include="Attribute.h">
       <Filter>Object\2. Attribute</Filter>
+    </ClInclude>
+    <ClInclude Include="Dungeon.h">
+      <Filter>Dungeon</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

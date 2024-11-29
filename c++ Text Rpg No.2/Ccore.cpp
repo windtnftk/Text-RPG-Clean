@@ -1,9 +1,9 @@
 #include "pch.h"
-#include "Ccore.h"
-#include "Item.h"
-#include "Enemy.h"
-#include "Equipment.h"
-#include "Attribute.h"
+//#include "Ccore.h"
+//#include "Item.h"
+//#include "Enemy.h"
+//#include "Equipment.h"
+//#include "Attribute.h"
 
 void Ccore::Progress()
 {

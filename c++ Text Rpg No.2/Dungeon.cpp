@@ -1,5 +1,7 @@
 #include "pch.h"
-#include "Dungeon.h"
+#include "EventManager.h"
+//#include "Dungeon.h"
+//#include "Ccore.h"
 
 //Node::Node()
 //	: E_Type(EventType::Treasure),
@@ -14,62 +16,26 @@ Node::~Node()
 	delete right;
 }
 // 던전 생성자
-Dungeon::Dungeon() {
-    srand(time(0)); // 랜덤 시드 초기화
-    start = generateDungeon();
-}
+Dungeon::Dungeon(unsigned int seed) : seed(seed), eventManager(seed) {}
 
-// 던전 소멸자
-Dungeon::~Dungeon() {
-    delete start;
-}
-
-// 던전 탐험 함수
-void Dungeon::traverse(Node* node) {
+void Dungeon::traverse(Node* node, int depth) {
     if (!node) return;
-    //NowCoding : 2024.11.28
-    // 이벤트 타입에 따라 메시지 출력,  
-    switch (node->E_Type) {
-    case EventType::Enemy:
-        std::cout << "You encounter an enemy!" << std::endl;
-        break;
-    case EventType::Treasure:
-        std::cout << "You find a treasure chest!" << std::endl;
-        break;
-    case EventType::Shop:
-        std::cout << "You enter a shop!" << std::endl;
-        break;
-    case EventType::Event:
-        std::cout << "A mysterious event occurs..." << std::endl;
-        break;
-    }
 
+    // 동일한 EventManager 객체를 사용하여 이벤트를 트리거
+    eventManager.triggerEvent(node->E_Type, depth);
+
+    // 던전의 경로를 선택하고 재귀적으로 탐험
     if (node->left && node->right) {
         std::cout << "Choose your path: [1] Left or [2] Right" << std::endl;
         int choice;
         std::cin >> choice;
 
         if (choice == 1)
-            traverse(node->left);
+            traverse(node->left, depth + 1);  // 깊이를 증가시키면서 왼쪽으로 탐험
         else
-            traverse(node->right);
+            traverse(node->right, depth + 1); // 깊이를 증가시키면서 오른쪽으로 탐험
     }
     else {
         std::cout << "No more paths. End of dungeon." << std::endl;
     }
-}
-
-// 던전 생성 함수
-Node* Dungeon::generateDungeon(int depth) {
-    if (depth == 0) return nullptr;
-
-    // 랜덤 이벤트 선택
-    EventType events[] = { EventType::Enemy, EventType::Treasure, EventType::Shop, EventType::Event };
-    EventType eventType = events[rand() % 4];
-
-    Node* currentNode = new Node(eventType);
-    currentNode->left = generateDungeon(depth - 1);
-    currentNode->right = generateDungeon(depth - 1);
-
-    return currentNode;
 }

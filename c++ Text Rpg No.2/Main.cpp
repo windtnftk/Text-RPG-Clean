@@ -3,8 +3,8 @@
 
 
 #include "pch.h"
-#include "Ccore.h"
-#include "Item.h"
+//#include "Ccore.h"
+//#include "Item.h"
 bool GameOff = true;
 
 int main()

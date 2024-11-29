@@ -32,6 +32,12 @@
     <Filter Include="Dungeon">
       <UniqueIdentifier>{6fdf2bd0-9a5b-4353-95a6-76cc3cedb976}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Dungeon\EventManager">
+      <UniqueIdentifier>{f55d9cc8-d6a2-4d86-a5f1-b941a88764ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Dungeon\EventManager\Event Class">
+      <UniqueIdentifier>{ce18c736-459a-491d-8389-6d7a844d1c57}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
@@ -57,6 +63,12 @@
     <ClCompile Include="Dungeon.cpp">
       <Filter>Dungeon</Filter>
     </ClCompile>
+    <ClCompile Include="EventManager.cpp">
+      <Filter>Dungeon\EventManager</Filter>
+    </ClCompile>
+    <ClCompile Include="MysteriousEvent.cpp">
+      <Filter>Dungeon\EventManager\Event Class</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -80,6 +92,12 @@
     </ClInclude>
     <ClInclude Include="Dungeon.h">
       <Filter>Dungeon</Filter>
+    </ClInclude>
+    <ClInclude Include="EventManager.h">
+      <Filter>Dungeon\EventManager</Filter>
+    </ClInclude>
+    <ClInclude Include="MysteriousEvent.h">
+      <Filter>Dungeon\EventManager\Event Class</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

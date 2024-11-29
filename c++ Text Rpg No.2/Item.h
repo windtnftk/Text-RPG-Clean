@@ -52,7 +52,7 @@ class MainItem
 {
 	SINGLE(MainItem);
 public:
-	
+	// TODO: 아직 아이템 장비 또는 사용효과 적용은 세세하게 구현 안했음, 추후에 해야됨
 	// 아이템 init
 	void ItemInit();
 	// 아이템 사용하는 함수

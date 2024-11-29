@@ -139,9 +139,11 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Default.cpp" />
+    <ClCompile Include="EventManager.cpp" />
     <ClCompile Include="Item.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Enemy.cpp" />
+    <ClCompile Include="MysteriousEvent.cpp" />
     <ClCompile Include="진행 사항할 사힝.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -157,7 +159,9 @@
     </ClInclude>
     <ClInclude Include="Default.h" />
     <ClInclude Include="Enemy.h" />
+    <ClInclude Include="EventManager.h" />
     <ClInclude Include="Item.h" />
+    <ClInclude Include="MysteriousEvent.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>

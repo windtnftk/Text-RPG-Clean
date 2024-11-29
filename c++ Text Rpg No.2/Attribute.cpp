@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "Attribute.h"
+//#include "Attribute.h"
 
 
 // 데미지 계산 함수

@@ -1,9 +1,9 @@
 
 #include "pch.h"
-#include "Enemy.h"
-#include "Ccore.h"
-#include "Attribute.h"
-#include <random>
+//#include "Enemy.h"
+//#include "Ccore.h"
+//#include "Attribute.h"
+
 
 void EneMy::EnemyInit()
 {

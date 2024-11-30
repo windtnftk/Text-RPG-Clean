@@ -32,28 +32,56 @@ enum class ItemId
 	Equipment8,
 	Equipment9,
 	Equipment10,
-	End = 32,
+	End = 30,
 };
 enum ItemRarity {
-	COMMON,      // 일반 아이템
-	UNCOMMON,    // 고급 아이템
-	RARE,        // 희귀 아이템
-	EPIC,        // 서사 아이템
-	LEGENDARY    // 전설 아이템
+	COMMON,      // 일반 아이템 1~2 번
+	UNCOMMON,    // 고급 아이템 3~4 번
+	RARE,        // 희귀 아이템 5~6 번
+	EPIC,        // 서사 아이템 7~8 번
+	LEGENDARY    // 전설 아이템 9~10 번
 };
-
+struct NewItemInfo
+{
+	string	Name; // 이름
+	ItemRarity Rarity; // 레어도
+	std::function<void()> effects;		// 착용시 효과
+	std::function<void()> removeEffects;// 탈착시 효과
+};
+class ItemEncyclopedia
+{
+	//int 값을 ItemId로 바꾸는 메크로
+	ItemId Id_Convert(int number)
+	{
+		return static_cast<ItemId>(number);
+	}
+	//int 값을 ItemRarity로 바꾸는 메크로
+	ItemRarity Rarity_Convert(int number)
+	{
+		return static_cast<ItemRarity>(number);
+	}
+	//vector<ItemId> ReturnItemId();
+	// 아이템 Id 받으면 ItemData 전달
+	NewItemInfo getNewItemInfo(ItemId id) {
+		return itemData.at(id);
+	}
+	ItemEncyclopedia();
+	~ItemEncyclopedia();
+private:
+	std::unordered_map<ItemId, NewItemInfo> itemData;
+};
 // 그러니까 아이템을 사용할때 이름값만 가져오면 어떤아이템을 사용되는지 
 // 확인되고 사용하는 함수? 를 만들고 싶은거자나
 // enum class 는 그렇게 사용하고 여기에는 결국 뭐를 만들고 싶은거냐 
 // 일단 매니저로 사용하는거는 나중에 분리하고 모든기능을 
 // 이 클래스에 때려놓고
 // 모듈화를 천천히 진행하자
-struct ItemMMOR
-{
-	ItemId		CurItemId;
-	string		ItemName; //아이템 이름 저장
-	ItemRarity	Rarity; // 아이템 레어도
-};
+//struct NewItemInfo
+//{
+//	ItemId		CurItemId;
+//	string		ItemName; //아이템 이름 저장
+//	//ItemRarity	Rarity; // 아이템 레어도
+//};
 // 지금 아이템을 추가하는 함수는 우리가 진행하는 
 // 함수에서 리스트(변수가 아닌 ItemArr에서 가져옴)
 // 그러면 아이템 백은 그대로 쓰고 아이템 도감을 실제로 만들고
@@ -75,18 +103,18 @@ public:
 private:
 	
 	// 아이템의 실제 저장공간
-	vector<ItemMMOR>  ItemBag;
+	vector<NewItemInfo>  ItemBag;
 	//손에 있는 아이템
-	vector<ItemMMOR>::iterator handleItem; //일단 privite 로 만들어서 사용해야 될듯
+	vector<NewItemInfo>::iterator handleItem; //일단 privite 로 만들어서 사용해야 될듯
 private:
 	//HandleItem 지우기, 일단 privite 로 만들어서 사용해야 될듯
-	void HandleItemErase(vector<ItemMMOR>::iterator& ItemId);
+	void HandleItemErase(vector<NewItemInfo>::iterator& ItemId);
 	// 아이템 찾아주는 함수 그리고 아이템 나열 하는 함수(public으로 바꿀지 고민)
 	void OpenItemBag();
 	// iterator 주소값을 id int값 뽑아오는 함수
-	ItemId SelectId(const vector<ItemMMOR>::iterator& ItemId);
+	ItemId SelectId(const vector<NewItemInfo>::iterator& ItemId);
 	// iterator 주소값을 id string값 뽑아오는 함수
-	string SelectName(const vector<ItemMMOR>::iterator& ItemId);
+	string SelectName(const vector<NewItemInfo>::iterator& ItemId);
 	
 	// ItemId 입력하면 장비에 추가하는 함수
 	void AddItem(ItemId item);
@@ -101,7 +129,7 @@ private:	//아이템 사용함수
 	std::unordered_map<ItemId, std::function<void()>> effects;
 	std::unordered_map<ItemId, std::function<void()>> removeEffects;
 	vector<ItemId> equippedItems; // 장비한 장비 목록
-	
+	// TODO: 효과 중복가능 문제 미해결
 	// 장착아이템 확인(view)
 	bool ViewEquippedItems();
 	// 장착아이템 해체
@@ -115,7 +143,11 @@ private:	//아이템 사용함수
 	void applyEffect(ItemId test);
 	// ItemId를 인수로 장비 효과제거 함수적용, Private 처리예정
 	void RemoveEffect(ItemId test);
-private:
+	
+public:
+	// 
+	std::function<void()> getEffectFunction(ItemId id);
+	std::function<void()> getRemoveEffectFunction(ItemId id);
 // 효과 정의 선언부
 #pragma region Effect
 void HealthPortionEffect();

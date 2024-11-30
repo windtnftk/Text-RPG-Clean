@@ -10,7 +10,7 @@ class MysteriousEvent {
 public:
     MysteriousEvent(EventList eventType) : eventType(eventType) {}
 
-    // NowCoding: 24.11.29 이벤트 생성 중
+    // TODO: 상점이벤트를 위해 item 함수 개편중
     void Ez_Event1() const;
     void Ez_Event2() const;
     void Ez_Event3() const;

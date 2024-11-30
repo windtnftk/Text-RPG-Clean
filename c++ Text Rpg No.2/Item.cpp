@@ -42,7 +42,7 @@ void MainItem::ItemInit()
 		
 		for (int i = 0; i < (int)ItemId::End; ++i)
 		{
-			ItemMMOR NewItem = { static_cast<ItemId>(i),ItemArr[i]};
+			NewItemInfo NewItem = { static_cast<ItemId>(i),ItemArr[i]};
 			ItemBag.push_back(NewItem);
 		}
 		
@@ -53,7 +53,7 @@ void MainItem::ItemInit()
 		for (int i = 0; i < 9; ++i)
 		{
 			int rendom = distribution(gen) % 10;
-			ItemMMOR NewItem = { static_cast<ItemId>(rendom),ItemArr[rendom] };
+			NewItemInfo NewItem = { static_cast<ItemId>(rendom),ItemArr[rendom] };
 			ItemBag.push_back(NewItem);
 		}
 		*/
@@ -64,7 +64,7 @@ void MainItem::ItemInit()
 	handleItem = ItemBag.begin();
 	OpenItemBag();
 }
-void MainItem::HandleItemErase(vector<ItemMMOR>::iterator& ItemId)
+void MainItem::HandleItemErase(vector<NewItemInfo>::iterator& ItemId)
 {
 	if (ItemId != ItemBag.end())
 	{
@@ -74,7 +74,7 @@ void MainItem::HandleItemErase(vector<ItemMMOR>::iterator& ItemId)
 }
 void MainItem::OpenItemBag()
 {
-	vector<ItemMMOR>::iterator BeginhandleItem = ItemBag.begin();
+	vector<NewItemInfo>::iterator BeginhandleItem = ItemBag.begin();
 
 	for (int i = 0; i < ItemBag.size(); ++BeginhandleItem, ++i)
 	{
@@ -83,7 +83,7 @@ void MainItem::OpenItemBag()
 		std::cout << i + 1 << ". " << GetName << std::endl;
 	}
 }
-ItemId MainItem::SelectId(const vector<ItemMMOR>::iterator& ItemId)
+ItemId MainItem::SelectId(const vector<NewItemInfo>::iterator& ItemId)
 {
 	if (ItemId == ItemBag.end())
 	{
@@ -96,9 +96,9 @@ ItemId MainItem::SelectId(const vector<ItemMMOR>::iterator& ItemId)
 	}
 
 }
-string MainItem::SelectName(const vector<ItemMMOR>::iterator& ItemId)
+string MainItem::SelectName(const vector<NewItemInfo>::iterator& ItemId)
 {
-	ItemMMOR Hi = *ItemId;
+	NewItemInfo Hi = *ItemId;
 	return (string)Hi.ItemName;
 }
 void MainItem::UseItemManuOpen()
@@ -120,8 +120,8 @@ void MainItem::AddItem(ItemId item)
 {
 	if (item <= ItemId::Equipment10)
 	{
-		ItemMMOR test = { item, ItemArr[static_cast<int>(item)] };
-		ItemBag.emplace_back(test);
+		//NewItemInfo test = ;
+		//ItemBag.emplace_back(test);
 	}
 	else
 	{
@@ -169,6 +169,7 @@ void MainItem::MoveEquipped(int choice)
 	AddItem(convert(choice)); // 아이템으로 복귀
 }
 // 아이템 효과 초기화
+// NowCoding: 24.11.30 아이템효과 초기화 함수 및 전체적으로 제거 및 최적화 진행예정
 void MainItem::initEffects()
 {
 	effects = {
@@ -394,6 +395,66 @@ void MainItem::RemoveEquipment10Effect()
 { Ccore::GetInst()->RemoveDefenseUp(5); }
 #pragma endregion
 
+std::function<void()> MainItem::getEffectFunction(ItemId id) {
+	switch (id) {
+	case ItemId::HealthPortion:		return [this]() { this->HealthPortionEffect();		};
+	case ItemId::BigHealthPortion:	return [this]() { this->BigHealthPortionEffect();	};
+	case ItemId::PowerPortion:		return [this]() { this->PowerPortionEffect() ;		};
+	case ItemId::BigPowerPortion:	return [this]() { this->BigPowerPortionEffect() ;	};
+	case ItemId::Potion4:			return [this]() { this->Potion4Effect() ;			};
+	case ItemId::Potion5:			return [this]() { this->Potion4Effect() ;			};
+	case ItemId::Potion6:			return [this]() { this->Potion4Effect();			};
+	case ItemId::Potion7:			return [this]() { this->Potion5Effect();			};
+	case ItemId::FirePortion:		return [this]() { this->FirePortionEffect();		};
+	case ItemId::BigFirePortion:	return [this]() { this->BigFirePortionEffect();		};
+	case ItemId::Weapon1:			return [this]() { this->Weapon1Effect();			};
+	case ItemId::Weapon2:			return [this]() { this->Weapon2Effect();			};
+	case ItemId::Weapon3:			return [this]() { this->Weapon3Effect();			};
+	case ItemId::Weapon4:			return [this]() { this->Weapon4Effect();			};
+	case ItemId::Weapon5:			return [this]() { this->Weapon5Effect();			};
+	case ItemId::Weapon6:			return [this]() { this->Weapon6Effect();			};
+	case ItemId::Weapon7:			return [this]() { this->Weapon7Effect();			};
+	case ItemId::Weapon8:			return [this]() { this->Weapon8Effect();			};
+	case ItemId::Weapon9:			return [this]() { this->Weapon9Effect();			};
+	case ItemId::Weapon10:			return [this]() { this->Weapon10Effect();			};
+	case ItemId::Equipment1:		return [this]() { this->Equipment1Effect();			};
+	case ItemId::Equipment2:		return [this]() { this->Equipment2Effect();			};
+	case ItemId::Equipment3:		return [this]() { this->Equipment3Effect();			};
+	case ItemId::Equipment4:		return [this]() { this->Equipment4Effect();			};
+	case ItemId::Equipment5:		return [this]() { this->Equipment5Effect();			};
+	case ItemId::Equipment6:		return [this]() { this->Equipment6Effect();			};
+	case ItemId::Equipment7:		return [this]() { this->Equipment7Effect();			};
+	case ItemId::Equipment8:		return [this]() { this->Equipment8Effect();			};
+	case ItemId::Equipment9:		return [this]() { this->Equipment9Effect();			};
+	case ItemId::Equipment10:		return [this]() { this->Equipment10Effect();		};
+	default: return []() { std::cout << "No effect for this item." << std::endl; };
+	}
+}
+std::function<void()> MainItem::getRemoveEffectFunction(ItemId id) {
+	switch (id) {
+	case ItemId::Weapon1:			return [this]() { this->RemoveWeapon1Effect();			};
+	case ItemId::Weapon2:			return [this]() { this->RemoveWeapon2Effect();			};
+	case ItemId::Weapon3:			return [this]() { this->RemoveWeapon3Effect();			};
+	case ItemId::Weapon4:			return [this]() { this->RemoveWeapon4Effect();			};
+	case ItemId::Weapon5:			return [this]() { this->RemoveWeapon5Effect();			};
+	case ItemId::Weapon6:			return [this]() { this->RemoveWeapon6Effect();			};
+	case ItemId::Weapon7:			return [this]() { this->RemoveWeapon7Effect();			};
+	case ItemId::Weapon8:			return [this]() { this->RemoveWeapon8Effect();			};
+	case ItemId::Weapon9:			return [this]() { this->RemoveWeapon9Effect();			};
+	case ItemId::Weapon10:			return [this]() { this->RemoveWeapon10Effect();			};
+	case ItemId::Equipment1:		return [this]() { this->RemoveEquipment1Effect();			};
+	case ItemId::Equipment2:		return [this]() { this->RemoveEquipment2Effect();			};
+	case ItemId::Equipment3:		return [this]() { this->RemoveEquipment3Effect();			};
+	case ItemId::Equipment4:		return [this]() { this->RemoveEquipment4Effect();			};
+	case ItemId::Equipment5:		return [this]() { this->RemoveEquipment5Effect();			};
+	case ItemId::Equipment6:		return [this]() { this->RemoveEquipment6Effect();			};
+	case ItemId::Equipment7:		return [this]() { this->RemoveEquipment7Effect();			};
+	case ItemId::Equipment8:		return [this]() { this->RemoveEquipment8Effect();			};
+	case ItemId::Equipment9:		return [this]() { this->RemoveEquipment9Effect();			};
+	case ItemId::Equipment10:		return [this]() { this->RemoveEquipment10Effect();		};
+	default: return []() { std::cout << "No effect for this item." << std::endl; };
+	}
+}
 MainItem::MainItem()
 	:ItemBag()
 	, handleItem{}
@@ -403,4 +464,25 @@ MainItem::MainItem()
 MainItem::~MainItem()
 {
 	ItemBag.clear();
+}
+
+
+
+ItemEncyclopedia::ItemEncyclopedia()
+{
+	for (int i = 0, k = 0; i < static_cast<int>(ItemId::End); ++i)
+	{
+		k = (i % 10) / 2; // 아이템 레어도 맞추기
+		ItemId id = Id_Convert(i);
+		itemData[id] = {
+			ItemArr[i],
+			Rarity_Convert(k),
+			MainItem::GetInst()->getEffectFunction(id),
+			MainItem::GetInst()->getRemoveEffectFunction(id)
+		};
+	}
+}
+
+ItemEncyclopedia::~ItemEncyclopedia()
+{
 }

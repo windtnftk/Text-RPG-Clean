@@ -29,6 +29,17 @@ void MysteriousEvent::Ez_Event3() const
 		<< "그는 다양한 물품을 판매하며, 일부는 조금 수상해 보입니다." << std::endl;
 	std::cout << "1) 물건을 산다" << std::endl;
 	std::cout << "2) 거래를 하지 않는다" << std::endl;
+	while (true)
+	{
+		switch (CinAuto())
+		{
+		case 1: // 상점 함수 진행
+		default:
+			break;
+		}
+
+	}
+	
 }
 
 void MysteriousEvent::Ez_Event4() const
@@ -146,4 +157,9 @@ string MysteriousEvent::getHardEventMessage() const
 		break;
 	}
 	return string();
+}
+
+void MysteriousEvent::StoreSetting() const
+{
+	/*MainItem::GetInst()->*/
 }

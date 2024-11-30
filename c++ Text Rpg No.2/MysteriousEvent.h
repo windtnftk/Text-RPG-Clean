@@ -23,7 +23,7 @@ public:
     void Hard_Event5()const;
     string getEasyEventMessage()const;
     string getHardEventMessage()const;
-
+    void StoreSetting()const;
     void trigger(int depth) const {
         if (depth < 3) {
             std::cout << getEasyEventMessage() << std::endl;

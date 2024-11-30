@@ -34,6 +34,14 @@ enum class ItemId
 	Equipment10,
 	End = 32,
 };
+enum ItemRarity {
+	COMMON,      // 일반 아이템
+	UNCOMMON,    // 고급 아이템
+	RARE,        // 희귀 아이템
+	EPIC,        // 서사 아이템
+	LEGENDARY    // 전설 아이템
+};
+
 // 그러니까 아이템을 사용할때 이름값만 가져오면 어떤아이템을 사용되는지 
 // 확인되고 사용하는 함수? 를 만들고 싶은거자나
 // enum class 는 그렇게 사용하고 여기에는 결국 뭐를 만들고 싶은거냐 
@@ -44,9 +52,12 @@ struct ItemMMOR
 {
 	ItemId		CurItemId;
 	string		ItemName; //아이템 이름 저장
-
+	ItemRarity	Rarity; // 아이템 레어도
 };
-
+// 지금 아이템을 추가하는 함수는 우리가 진행하는 
+// 함수에서 리스트(변수가 아닌 ItemArr에서 가져옴)
+// 그러면 아이템 백은 그대로 쓰고 아이템 도감을 실제로 만들고
+// 거기에 있는 정보를 가져오는게 
 
 class MainItem
 {

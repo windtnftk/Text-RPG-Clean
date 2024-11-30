@@ -74,32 +74,29 @@ void MainItem::HandleItemErase(vector<NewItemInfo>::iterator& ItemId)
 }
 void MainItem::OpenItemBag()
 {
-	vector<NewItemInfo>::iterator BeginhandleItem = ItemBag.begin();
-
-	for (int i = 0; i < ItemBag.size(); ++BeginhandleItem, ++i)
+	auto it = ItemBag.begin();
+	for (int i = 0; it != ItemBag.end(); ++it,++i)
 	{
-		//int GetId = GetInst()->SelectId(BeginhandleItem);
-		string GetName = SelectName(BeginhandleItem);
+		string GetName = SelectName(it);
 		std::cout << i + 1 << ". " << GetName << std::endl;
 	}
 }
-ItemId MainItem::SelectId(const vector<NewItemInfo>::iterator& ItemId)
-{
-	if (ItemId == ItemBag.end())
-	{
-		std::cout << "Get Id fale" << std::endl;
-		return ItemId::End;
-	}
-	else
-	{
-		return ItemId->CurItemId;
-	}
+//ItemId MainItem::SelectId(const vector<NewItemInfo>::iterator& ItemId)
+//{
+//	if (ItemId == ItemBag.end())
+//	{
+//		std::cout << "Get Id fale" << std::endl;
+//		return ItemId::End;
+//	}
+//	else
+//	{
+//		return ItemId->Name;
+//	}}
 
-}
 string MainItem::SelectName(const vector<NewItemInfo>::iterator& ItemId)
 {
 	NewItemInfo Hi = *ItemId;
-	return (string)Hi.ItemName;
+	return (string)Hi.Name;
 }
 void MainItem::UseItemManuOpen()
 {
@@ -118,15 +115,7 @@ void MainItem::UseItemManuOpen()
 }
 void MainItem::AddItem(ItemId item)
 {
-	if (item <= ItemId::Equipment10)
-	{
-		//NewItemInfo test = ;
-		//ItemBag.emplace_back(test);
-	}
-	else
-	{
-		std::cout << "잘못된 아이템 아이디입니다." << std::endl;
-	}
+	ItemBag.emplace_back(ItemEncyclopedia::GetInst()->getNewItemInfo(item));
 }
 void MainItem::TotalequippedItems()
 {
@@ -148,93 +137,44 @@ bool MainItem::ViewEquippedItems()
 	std::cout << std::endl;
 	for (auto q : equippedItems)
 	{
-		auto it = static_cast<int>(q);
-		std::cout <<"1. " << std::endl << ItemArr[it] << ", " << std::endl;
+		int it = static_cast<int>(q);
+		std::cout << it + 1<<". " << std::endl << ItemArr[it] << ", " << std::endl;
 	}
 	return true;
 }
 void MainItem::MoveEquipped(int choice)
-{
-	auto it = equippedItems.begin();
-	for (int i = 1; i < choice; ++i)
-	{
-		++it;
-	}
-	if (equippedItems.end() == it)
+{	// TODO: Choice부분 1을 강제로 더하고 뺴는 부분을 수정해야됨, ViewEquippedItems포함
+	choice -= 1;
+	if (choice < 0|| choice >= equippedItems.size())
 	{
 		ErrorCode();
 		return;
 	}
+	auto it = equippedItems.begin() + choice;
 	equippedItems.erase(it); // 장비 해체
 	AddItem(convert(choice)); // 아이템으로 복귀
 }
 // 아이템 효과 초기화
-// NowCoding: 24.11.30 아이템효과 초기화 함수 및 전체적으로 제거 및 최적화 진행예정
 void MainItem::initEffects()
 {
-	effects = {
-	{ ItemId::HealthPortion, std::bind(&MainItem::HealthPortionEffect, this) },
-	{ ItemId::BigHealthPortion, std::bind(&MainItem::BigHealthPortionEffect , this) },
-	{ ItemId::PowerPortion, std::bind(&MainItem::PowerPortionEffect , this) },
-	{ ItemId::BigPowerPortion, std::bind(&MainItem::BigPowerPortionEffect , this) },
-	{ ItemId::Potion4, std::bind(&MainItem::Potion4Effect , this) },
-	{ ItemId::Potion5, std::bind(&MainItem::Potion5Effect , this) },
-	{ ItemId::Potion6, std::bind(&MainItem::Potion6Effect , this) },
-	{ ItemId::Potion7, std::bind(&MainItem::Potion7Effect , this) },
-	{ ItemId::FirePortion, std::bind(&MainItem::FirePortionEffect , this) },
-	{ ItemId::BigFirePortion, std::bind(&MainItem::BigFirePortionEffect, this) },
-	{ ItemId::Weapon1, std::bind(&MainItem::Weapon1Effect , this) },
-	{ ItemId::Weapon2, std::bind(&MainItem::Weapon2Effect , this) },
-	{ ItemId::Weapon3, std::bind(&MainItem::Weapon3Effect , this) },
-	{ ItemId::Weapon4, std::bind(&MainItem::Weapon4Effect , this) },
-	{ ItemId::Weapon5, std::bind(&MainItem::Weapon5Effect , this) },
-	{ ItemId::Weapon6, std::bind(&MainItem::Weapon6Effect , this) },
-	{ ItemId::Weapon7, std::bind(&MainItem::Weapon7Effect , this) },
-	{ ItemId::Weapon8, std::bind(&MainItem::Weapon8Effect , this) },
-	{ ItemId::Weapon9, std::bind(&MainItem::Weapon9Effect , this) },
-	{ ItemId::Weapon10, std::bind(&MainItem::Weapon10Effect , this) },
-	{ ItemId::Equipment1 , std::bind(&MainItem::Equipment1Effect, this) },
-	{ ItemId::Equipment2, std::bind(&MainItem::Equipment2Effect, this) },
-	{ ItemId::Equipment3, std::bind(&MainItem::Equipment3Effect, this) },
-	{ ItemId::Equipment4, std::bind(&MainItem::Equipment4Effect, this) },
-	{ ItemId::Equipment5, std::bind(&MainItem::Equipment5Effect, this) },
-	{ ItemId::Equipment6, std::bind(&MainItem::Equipment6Effect, this) },
-	{ ItemId::Equipment7, std::bind(&MainItem::Equipment7Effect, this) },
-	{ ItemId::Equipment8, std::bind(&MainItem::Equipment8Effect, this) },
-	{ ItemId::Equipment9, std::bind(&MainItem::Equipment9Effect, this) },
-	{ ItemId::Equipment10, std::bind(&MainItem::Equipment10Effect , this) } };
-	removeEffects =
-	{
-		{ ItemId::Weapon1, std::bind(&MainItem::RemoveWeapon1Effect , this) },
-		{ ItemId::Weapon2, std::bind(&MainItem::RemoveWeapon2Effect , this) },
-		{ ItemId::Weapon3, std::bind(&MainItem::RemoveWeapon3Effect , this) },
-		{ ItemId::Weapon4, std::bind(&MainItem::RemoveWeapon4Effect , this) },
-		{ ItemId::Weapon5, std::bind(&MainItem::RemoveWeapon5Effect , this) },
-		{ ItemId::Weapon6, std::bind(&MainItem::RemoveWeapon6Effect , this) },
-		{ ItemId::Weapon7, std::bind(&MainItem::RemoveWeapon7Effect , this) },
-		{ ItemId::Weapon8, std::bind(&MainItem::RemoveWeapon8Effect , this) },
-		{ ItemId::Weapon9, std::bind(&MainItem::RemoveWeapon9Effect , this) },
-		{ ItemId::Weapon10, std::bind(&MainItem::RemoveWeapon10Effect , this) },
-		{ ItemId::Equipment1, std::bind(&MainItem::RemoveEquipment1Effect, this) },
-		{ ItemId::Equipment2, std::bind(&MainItem::RemoveEquipment2Effect, this) },
-		{ ItemId::Equipment3, std::bind(&MainItem::RemoveEquipment3Effect, this) },
-		{ ItemId::Equipment4, std::bind(&MainItem::RemoveEquipment4Effect, this) },
-		{ ItemId::Equipment5, std::bind(&MainItem::RemoveEquipment5Effect, this) },
-		{ ItemId::Equipment6, std::bind(&MainItem::RemoveEquipment6Effect, this) },
-		{ ItemId::Equipment7, std::bind(&MainItem::RemoveEquipment7Effect, this) },
-		{ ItemId::Equipment8, std::bind(&MainItem::RemoveEquipment8Effect, this) },
-		{ ItemId::Equipment9, std::bind(&MainItem::RemoveEquipment9Effect, this) },
-		{ ItemId::Equipment10, std::bind(&MainItem::RemoveEquipment10Effect , this) }
-	};
+	
 }
 // 장비 장착 함수
 void MainItem::ItemTypeEffect(ItemId id) {
-	if (ItemId::BigFirePortion < id)
+	if (ItemId::Weapon1 > id)
 	{
 		applyEffect(id);
 	}
-	else if (std::find(equippedItems.begin(), equippedItems.end(), id) == equippedItems.end()) {
-		equippedItems.push_back(id); // 중복 장착 방지
+	else if (std::find(equippedItems.begin(), equippedItems.end(), id) == equippedItems.end())
+	{	
+		// NowCoding: 24.11.30 아이템 도감 만들고, ItemBag을 만들면서 드는생각 ItemBag을 전체 정보를 받을 필요가 있나?
+		// 그냥 ItemId만 가지고 있고 효과 적용시에 도감 통해서 효과 적용하고 관리하고 ItemBag은 뭘 가지고 있는지만
+		// 체크하면 되는거 같은데 아이템 장비도 bool 변수로 그냥 사용여부 체크하고 ㅇㅇ 일단 여기 함수 고치면서 생각 ㄱ
+		// 장비 장착함수 및 변수 삭제 생각중 그냥 아이템이용한 동작을
+		// Main Item에서 하고 그냥 실제 효과 적용을 도감에서 하자
+		// 중복 장착 방지
+		//if()
+		equippedItems.push_back(id); 
 		applyEffect(id);             // 장비 효과 적용
 	}
 	else {
@@ -260,142 +200,137 @@ void MainItem::applyEquippedItems() {
 }
 void MainItem::applyEffect(ItemId test)
 {
-	auto effect = effects.find(test);  // ItemId에 해당하는 효과 함수 검색
-	if (effect != effects.end()) {
-		effect->second();  // 해당 함수 호출하여 아이템 효과 적용
-	}
-	else {
-		std::cout << "No effect for this item.\n";
-	}
+	ItemEncyclopedia::GetInst()->getNewItemInfo(test).effects();
 }
 void MainItem::RemoveEffect(ItemId test)
 {
-	auto effect = removeEffects.find(test);  // ItemId에 해당하는 효과 함수 검색
-	if (effect != removeEffects.end()) {
-		effect->second();  // 해당 함수 호출하여 아이템 효과 적용
+	if (test < ItemId::Weapon1) 
+	{
+		std::cout << "사용 item은 탈착할수 없습니다." << std::endl;
+		return;
 	}
-	else {
-		std::cout << "No effect for this item.\n";
-	}
+	 // ItemId에 해당하는 효과 함수 검색
+	ItemEncyclopedia::GetInst()->getNewItemInfo(test).removeEffects();
+	//해당 함수 호출하여 아이템 효과 적용
 }
 // 아이템 효과 대충 만듬 나중에 밸런스 보면서 넣기
 // 아이템 사용
 #pragma region Potion Effects
-void MainItem::HealthPortionEffect()
+void ItemEncyclopedia::HealthPortionEffect()
 { Ccore::GetInst()->LimitHealthUp(5); }
-void MainItem::BigHealthPortionEffect()
+void ItemEncyclopedia::BigHealthPortionEffect()
 { Ccore::GetInst()->LimitHealthUp(5); }
-void MainItem::PowerPortionEffect()
+void ItemEncyclopedia::PowerPortionEffect()
 { Ccore::GetInst()->LimitHealthUp(5); }
-void MainItem::BigPowerPortionEffect()
+void ItemEncyclopedia::BigPowerPortionEffect()
 { Ccore::GetInst()->LimitHealthUp(5); }
-void MainItem::Potion4Effect()
+void ItemEncyclopedia::Potion4Effect()
 { Ccore::GetInst()->LimitHealthUp(5); }
-void MainItem::Potion5Effect()
+void ItemEncyclopedia::Potion5Effect()
 { Ccore::GetInst()->Newbarrier(5); }
-void MainItem::Potion6Effect()
+void ItemEncyclopedia::Potion6Effect()
 { Ccore::GetInst()->Newbarrier(5); }
-void MainItem::Potion7Effect()
+void ItemEncyclopedia::Potion7Effect()
 { Ccore::GetInst()->Newbarrier(5); }
-void MainItem::FirePortionEffect()
+void ItemEncyclopedia::FirePortionEffect()
 { Ccore::GetInst()->Newbarrier(5); }
-void MainItem::BigFirePortionEffect()
+void ItemEncyclopedia::BigFirePortionEffect()
 { Ccore::GetInst()->Newbarrier(5); }
 #pragma endregion
 // 무기 장착
 #pragma region Weapon Effects										
-void MainItem::Weapon1Effect()
+void ItemEncyclopedia::Weapon1Effect()
 { Ccore::GetInst()->AddPowerUp(5); }
-void MainItem::Weapon2Effect()
+void ItemEncyclopedia::Weapon2Effect()
 { Ccore::GetInst()->AddPowerUp(5); }
-void MainItem::Weapon3Effect()
+void ItemEncyclopedia::Weapon3Effect()
 { Ccore::GetInst()->AddPowerUp(5); }
-void MainItem::Weapon4Effect()
+void ItemEncyclopedia::Weapon4Effect()
 { Ccore::GetInst()->AddPowerUp(5); }
-void MainItem::Weapon5Effect()
+void ItemEncyclopedia::Weapon5Effect()
 { Ccore::GetInst()->AddPowerUp(5); }
-void MainItem::Weapon6Effect()
+void ItemEncyclopedia::Weapon6Effect()
 { Ccore::GetInst()->AddPowerUp(5); }
-void MainItem::Weapon7Effect()
+void ItemEncyclopedia::Weapon7Effect()
 { Ccore::GetInst()->AddPowerUp(5); }
-void MainItem::Weapon8Effect()
+void ItemEncyclopedia::Weapon8Effect()
 { Ccore::GetInst()->AddPowerUp(5); }
-void MainItem::Weapon9Effect()
+void ItemEncyclopedia::Weapon9Effect()
 { Ccore::GetInst()->AddPowerUp(5); }
-void MainItem::Weapon10Effect()
+void ItemEncyclopedia::Weapon10Effect()
 { Ccore::GetInst()->AddPowerUp(5); }
 #pragma endregion
 // 장비 장착
 #pragma region Equipment Effects		
-void MainItem::Equipment1Effect()
+void ItemEncyclopedia::Equipment1Effect()
 { Ccore::GetInst()->AddDefenseUp(5); }
-void MainItem::Equipment2Effect()
+void ItemEncyclopedia::Equipment2Effect()
 { Ccore::GetInst()->AddDefenseUp(5); }
-void MainItem::Equipment3Effect()
+void ItemEncyclopedia::Equipment3Effect()
 { Ccore::GetInst()->AddDefenseUp(5); }
-void MainItem::Equipment4Effect()
+void ItemEncyclopedia::Equipment4Effect()
 { Ccore::GetInst()->AddDefenseUp(5); }
-void MainItem::Equipment5Effect()
+void ItemEncyclopedia::Equipment5Effect()
 { Ccore::GetInst()->AddDefenseUp(5); }
-void MainItem::Equipment6Effect()
+void ItemEncyclopedia::Equipment6Effect()
 { Ccore::GetInst()->AddDefenseUp(5); }
-void MainItem::Equipment7Effect()
+void ItemEncyclopedia::Equipment7Effect()
 { Ccore::GetInst()->AddDefenseUp(5); }
-void MainItem::Equipment8Effect()
+void ItemEncyclopedia::Equipment8Effect()
 { Ccore::GetInst()->AddDefenseUp(5); }
-void MainItem::Equipment9Effect()
+void ItemEncyclopedia::Equipment9Effect()
 { Ccore::GetInst()->AddDefenseUp(5); }
-void MainItem::Equipment10Effect()
+void ItemEncyclopedia::Equipment10Effect()
 { Ccore::GetInst()->AddDefenseUp(5); }
 #pragma endregion
 // 무기 해체
 #pragma region Remove Weapon Effects		
-void MainItem::RemoveWeapon1Effect()
+void ItemEncyclopedia::RemoveWeapon1Effect()
 { Ccore::GetInst()->RemovePowerUp(5); }
-void MainItem::RemoveWeapon2Effect()
+void ItemEncyclopedia::RemoveWeapon2Effect()
 { Ccore::GetInst()->RemovePowerUp(5); }
-void MainItem::RemoveWeapon3Effect()
+void ItemEncyclopedia::RemoveWeapon3Effect()
 { Ccore::GetInst()->RemovePowerUp(5); }
-void MainItem::RemoveWeapon4Effect()
+void ItemEncyclopedia::RemoveWeapon4Effect()
 { Ccore::GetInst()->RemovePowerUp(5); }
-void MainItem::RemoveWeapon5Effect()
+void ItemEncyclopedia::RemoveWeapon5Effect()
 { Ccore::GetInst()->RemovePowerUp(5); }
-void MainItem::RemoveWeapon6Effect()
+void ItemEncyclopedia::RemoveWeapon6Effect()
 { Ccore::GetInst()->RemovePowerUp(5); }
-void MainItem::RemoveWeapon7Effect()
+void ItemEncyclopedia::RemoveWeapon7Effect()
 { Ccore::GetInst()->RemovePowerUp(5); }
-void MainItem::RemoveWeapon8Effect()
+void ItemEncyclopedia::RemoveWeapon8Effect()
 { Ccore::GetInst()->RemovePowerUp(5); }
-void MainItem::RemoveWeapon9Effect()
+void ItemEncyclopedia::RemoveWeapon9Effect()
 { Ccore::GetInst()->RemovePowerUp(5); }
-void MainItem::RemoveWeapon10Effect()
+void ItemEncyclopedia::RemoveWeapon10Effect()
 { Ccore::GetInst()->RemovePowerUp(5); }
 #pragma endregion
 // 장비 해체
 #pragma region Remove Equipment Effects	
-void MainItem::RemoveEquipment1Effect()
+void ItemEncyclopedia::RemoveEquipment1Effect()
 { Ccore::GetInst()->RemoveDefenseUp(5); }
-void MainItem::RemoveEquipment2Effect()
+void ItemEncyclopedia::RemoveEquipment2Effect()
 { Ccore::GetInst()->RemoveDefenseUp(5); }
-void MainItem::RemoveEquipment3Effect()
+void ItemEncyclopedia::RemoveEquipment3Effect()
 { Ccore::GetInst()->RemoveDefenseUp(5); }
-void MainItem::RemoveEquipment4Effect()
+void ItemEncyclopedia::RemoveEquipment4Effect()
 { Ccore::GetInst()->RemoveDefenseUp(5); }
-void MainItem::RemoveEquipment5Effect()
+void ItemEncyclopedia::RemoveEquipment5Effect()
 { Ccore::GetInst()->RemoveDefenseUp(5); }
-void MainItem::RemoveEquipment6Effect()
+void ItemEncyclopedia::RemoveEquipment6Effect()
 { Ccore::GetInst()->RemoveDefenseUp(5); }
-void MainItem::RemoveEquipment7Effect()
+void ItemEncyclopedia::RemoveEquipment7Effect()
 { Ccore::GetInst()->RemoveDefenseUp(5); }
-void MainItem::RemoveEquipment8Effect()
+void ItemEncyclopedia::RemoveEquipment8Effect()
 { Ccore::GetInst()->RemoveDefenseUp(5); }
-void MainItem::RemoveEquipment9Effect()
+void ItemEncyclopedia::RemoveEquipment9Effect()
 { Ccore::GetInst()->RemoveDefenseUp(5); }
-void MainItem::RemoveEquipment10Effect()
+void ItemEncyclopedia::RemoveEquipment10Effect()
 { Ccore::GetInst()->RemoveDefenseUp(5); }
 #pragma endregion
 
-std::function<void()> MainItem::getEffectFunction(ItemId id) {
+std::function<void()> ItemEncyclopedia::getEffectFunction(ItemId id) {
 	switch (id) {
 	case ItemId::HealthPortion:		return [this]() { this->HealthPortionEffect();		};
 	case ItemId::BigHealthPortion:	return [this]() { this->BigHealthPortionEffect();	};
@@ -427,10 +362,10 @@ std::function<void()> MainItem::getEffectFunction(ItemId id) {
 	case ItemId::Equipment8:		return [this]() { this->Equipment8Effect();			};
 	case ItemId::Equipment9:		return [this]() { this->Equipment9Effect();			};
 	case ItemId::Equipment10:		return [this]() { this->Equipment10Effect();		};
-	default: return []() { std::cout << "No effect for this item." << std::endl; };
+	default: return []() { std::cout << "item 번호가 잘못되었습니다." << std::endl; };
 	}
 }
-std::function<void()> MainItem::getRemoveEffectFunction(ItemId id) {
+std::function<void()> ItemEncyclopedia::getRemoveEffectFunction(ItemId id) {
 	switch (id) {
 	case ItemId::Weapon1:			return [this]() { this->RemoveWeapon1Effect();			};
 	case ItemId::Weapon2:			return [this]() { this->RemoveWeapon2Effect();			};
@@ -452,23 +387,12 @@ std::function<void()> MainItem::getRemoveEffectFunction(ItemId id) {
 	case ItemId::Equipment8:		return [this]() { this->RemoveEquipment8Effect();			};
 	case ItemId::Equipment9:		return [this]() { this->RemoveEquipment9Effect();			};
 	case ItemId::Equipment10:		return [this]() { this->RemoveEquipment10Effect();		};
-	default: return []() { std::cout << "No effect for this item." << std::endl; };
+	default: return []() { std::cout << "item 번호가 잘못되었습니다." << std::endl; };
 	}
 }
-MainItem::MainItem()
-	:ItemBag()
-	, handleItem{}
-	, effects{
-	}
-{}
-MainItem::~MainItem()
-{
-	ItemBag.clear();
-}
-
-
 
 ItemEncyclopedia::ItemEncyclopedia()
+	:itemData{}
 {
 	for (int i = 0, k = 0; i < static_cast<int>(ItemId::End); ++i)
 	{
@@ -477,12 +401,23 @@ ItemEncyclopedia::ItemEncyclopedia()
 		itemData[id] = {
 			ItemArr[i],
 			Rarity_Convert(k),
-			MainItem::GetInst()->getEffectFunction(id),
-			MainItem::GetInst()->getRemoveEffectFunction(id)
+			getEffectFunction(id),
+			getRemoveEffectFunction(id),false
 		};
 	}
 }
 
 ItemEncyclopedia::~ItemEncyclopedia()
 {
+}
+MainItem::MainItem()
+	:ItemBag{}
+	, handleItem{}
+	, equippedItems{}
+{
+	
+}
+MainItem::~MainItem()
+{
+	ItemBag.clear();
 }

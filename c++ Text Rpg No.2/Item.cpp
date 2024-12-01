@@ -61,15 +61,15 @@ void MainItem::ItemInit()
 	AddItem(ItemId::Weapon1);
 	AddItem(ItemId::Equipment1);
 	AddItem(ItemId::HealthPortion);
-	handleItem = ItemBag.begin();
+	handleItem = ItemBag.end();
 	OpenItemBag();
 }
-void MainItem::HandleItemErase(vector<NewItemInfo>::iterator& ItemId)
+void MainItem::HandleItemErase(vector<ItemId>::iterator& ItemId)
 {
 	if (ItemId != ItemBag.end())
 	{
 		ItemBag.erase(ItemId);
-		handleItem = ItemBag.begin();
+		//handleItem = ItemBag.begin();
 	}
 }
 void MainItem::OpenItemBag()
@@ -77,8 +77,8 @@ void MainItem::OpenItemBag()
 	auto it = ItemBag.begin();
 	for (int i = 0; it != ItemBag.end(); ++it,++i)
 	{
-		string GetName = SelectName(it);
-		std::cout << i + 1 << ". " << GetName << std::endl;
+		string GetName = ItemEncyclopedia::GetInst()->ItemName(*it);
+		std::cout << i << ". " << GetName << std::endl;
 	}
 }
 //ItemId MainItem::SelectId(const vector<NewItemInfo>::iterator& ItemId)
@@ -92,17 +92,11 @@ void MainItem::OpenItemBag()
 //	{
 //		return ItemId->Name;
 //	}}
-
-string MainItem::SelectName(const vector<NewItemInfo>::iterator& ItemId)
-{
-	NewItemInfo Hi = *ItemId;
-	return (string)Hi.Name;
-}
 void MainItem::UseItemManuOpen()
 {
 	OpenItemBag();
 	// 아이템 을 고르고 사용을 할지 정하자
-	std::cout << std::endl << "사용하실 아이템을 고르세요" << std::endl;
+	std::cout << std::endl << "사용,장착 하실 아이템을 고르세요" << std::endl;
 	int choice = CinAuto();
 	if (0 == choice || choice > ItemBag.size() || std::cin.fail())
 	{
@@ -111,107 +105,119 @@ void MainItem::UseItemManuOpen()
 		ErrorCode();
 		return;
 	}
-	ItemTypeEffect(convert(choice));
+	handleAuto(choice);
+	UsingItem();
 }
 void MainItem::AddItem(ItemId item)
 {
-	ItemBag.emplace_back(ItemEncyclopedia::GetInst()->getNewItemInfo(item));
+	ItemBag.push_back(item);
+}
+void MainItem::DeleteItem()
+{
+	HandleItemErase(handleItem);
+}
+void MainItem::UsingItem()
+{
+	if (ItemEffect(*handleItem))
+	{
+		DeleteItem();
+	}
 }
 void MainItem::TotalequippedItems()
 {
 	if (!ViewEquippedItems())return;
-	std::cout << "장비를 해체하시겠습니까?" << std::endl;
-	if (!Yes_No()) return;
-	std::cout << "어떤장비를 해체하시겠습니까?" << std::endl;
-	MoveEquipped(CinAuto());
+	auto check = true;
+	while (!check)
+	{
+		std::cout << "장비를 해체하시겠습니까?" << std::endl;
+		if (!Yes_No()) return;
+		std::cout << "어떤장비를 해체하시겠습니까?" << std::endl;
+		check = MoveEquipped();
+	}
 	
+}
+void MainItem::DeleteItemManuOpen()
+{
+	OpenItemBag();
+	// 아이템 을 고르고 사용을 할지 정하자
+	std::cout << std::endl << "버릴 아이템을 고르세요" << std::endl;
+	int choice = CinAuto();
+	if (0 == choice || choice > ItemBag.size() || std::cin.fail())
+	{
+		std::cin.clear();
+		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+		ErrorCode();
+		return;
+	}
+	handleAuto(choice);
+	DeleteItem();
 }
 bool MainItem::ViewEquippedItems()
 {
-	std::cout << "장착중인 장비" ;
-	if (equippedItems.empty())
+	
+	std::cout << "장착중인 장비" << std::endl; ;
+	if (!EquipmentCheck())
 	{
 		std::cout <<"가 없습니다."<< std::endl;
 		return false;
 	}
-	std::cout << std::endl;
-	for (auto q : equippedItems)
-	{
-		int it = static_cast<int>(q);
-		std::cout << it + 1<<". " << std::endl << ItemArr[it] << ", " << std::endl;
-	}
 	return true;
 }
-void MainItem::MoveEquipped(int choice)
-{	// TODO: Choice부분 1을 강제로 더하고 뺴는 부분을 수정해야됨, ViewEquippedItems포함
-	choice -= 1;
-	if (choice < 0|| choice >= equippedItems.size())
+bool MainItem::EquipmentCheck()
+{
+	bool check = false;
+	for (const auto q : ItemBag)
+	{
+		if (EquipentCheckAuto(q))
+		{
+			check = true;
+			std::cout << ItemEncyclopedia::GetInst()->ItemName(q) << ", " << std::endl;
+		}
+	}
+	return check;
+}
+bool MainItem::MoveEquipped()
+{	// TODO: Choice부분 1을 강제로 더하고 뺴는 부분을 수정해야됨, ViewEquippedItems포함 그냥 0번아이템이라 부르자
+	auto it = ItemBag.begin() + CinAuto();
+	if (it == ItemBag.end()) // 아이템가방의 위치 선택값이 지정값을 벗어났을 경우
 	{
 		ErrorCode();
-		return;
+		return false;
 	}
-	auto it = equippedItems.begin() + choice;
-	equippedItems.erase(it); // 장비 해체
-	AddItem(convert(choice)); // 아이템으로 복귀
-}
-// 아이템 효과 초기화
-void MainItem::initEffects()
-{
-	
-}
-// 장비 장착 함수
-void MainItem::ItemTypeEffect(ItemId id) {
-	if (ItemId::Weapon1 > id)
-	{
-		applyEffect(id);
-	}
-	else if (std::find(equippedItems.begin(), equippedItems.end(), id) == equippedItems.end())
-	{	
-		// NowCoding: 24.11.30 아이템 도감 만들고, ItemBag을 만들면서 드는생각 ItemBag을 전체 정보를 받을 필요가 있나?
-		// 그냥 ItemId만 가지고 있고 효과 적용시에 도감 통해서 효과 적용하고 관리하고 ItemBag은 뭘 가지고 있는지만
-		// 체크하면 되는거 같은데 아이템 장비도 bool 변수로 그냥 사용여부 체크하고 ㅇㅇ 일단 여기 함수 고치면서 생각 ㄱ
-		// 장비 장착함수 및 변수 삭제 생각중 그냥 아이템이용한 동작을
-		// Main Item에서 하고 그냥 실제 효과 적용을 도감에서 하자
-		// 중복 장착 방지
-		//if()
-		equippedItems.push_back(id); 
-		applyEffect(id);             // 장비 효과 적용
-	}
-	else {
-		std::cout << "Item is already equipped.\n";
-	}
+	RemoveEffect(*it);
+	//AddItem(convert(choice)); // 아이템으로 복귀
+	return true;
 }
 // 장비 해제 함수
 void MainItem::UnItemTypeEffect(ItemId id) {
-	auto it = std::find(equippedItems.begin(), equippedItems.end(), id);
-	if (it != equippedItems.end()) {
-		RemoveEffect(id);            // 장비 효과 제거
-		equippedItems.erase(it);         // 목록에서 제거
-	}
-	else {
-		std::cout << "Item is not equipped.\n";
+	for (const auto q : ItemBag)
+	{
+		RemoveEffect(q);
 	}
 }
 // 장착된 모든 장비의 효과를 일괄 적용
-void MainItem::applyEquippedItems() {
-	for (const auto& item : equippedItems) {
-		applyEffect(item);
+void MainItem::BagEffect()
+{
+	for (const auto q : ItemBag)
+	{
+		//사용 아이템인지 확인 하고 아닐경우 아이템 사용
+		if(!ItemEncyclopedia::GetInst()->ItemCheck(q)) applyEffect(q); 
 	}
+}
+bool MainItem::ItemEffect(ItemId Id)
+{
+	if (!ItemEncyclopedia::GetInst()->ItemCheck(Id)) return false; // 소모성 아이템이 아닐경우 바로 리턴
+	ItemEncyclopedia::GetInst()->E_Apply(Id);
 }
 void MainItem::applyEffect(ItemId test)
 {
-	ItemEncyclopedia::GetInst()->getNewItemInfo(test).effects();
+	ItemEncyclopedia::GetInst()->E_Apply(test);
+	ItemEncyclopedia::GetInst()->E_ON(test);
 }
 void MainItem::RemoveEffect(ItemId test)
 {
-	if (test < ItemId::Weapon1) 
-	{
-		std::cout << "사용 item은 탈착할수 없습니다." << std::endl;
-		return;
-	}
-	 // ItemId에 해당하는 효과 함수 검색
-	ItemEncyclopedia::GetInst()->getNewItemInfo(test).removeEffects();
-	//해당 함수 호출하여 아이템 효과 적용
+	ItemEncyclopedia::GetInst()->ER_Apply(test);
+	ItemEncyclopedia::GetInst()->E_Off(test);
 }
 // 아이템 효과 대충 만듬 나중에 밸런스 보면서 넣기
 // 아이템 사용
@@ -337,9 +343,9 @@ std::function<void()> ItemEncyclopedia::getEffectFunction(ItemId id) {
 	case ItemId::PowerPortion:		return [this]() { this->PowerPortionEffect() ;		};
 	case ItemId::BigPowerPortion:	return [this]() { this->BigPowerPortionEffect() ;	};
 	case ItemId::Potion4:			return [this]() { this->Potion4Effect() ;			};
-	case ItemId::Potion5:			return [this]() { this->Potion4Effect() ;			};
-	case ItemId::Potion6:			return [this]() { this->Potion4Effect();			};
-	case ItemId::Potion7:			return [this]() { this->Potion5Effect();			};
+	case ItemId::Potion5:			return [this]() { this->Potion5Effect() ;			};
+	case ItemId::Potion6:			return [this]() { this->Potion6Effect();			};
+	case ItemId::Potion7:			return [this]() { this->Potion7Effect();			};
 	case ItemId::FirePortion:		return [this]() { this->FirePortionEffect();		};
 	case ItemId::BigFirePortion:	return [this]() { this->BigFirePortionEffect();		};
 	case ItemId::Weapon1:			return [this]() { this->Weapon1Effect();			};
@@ -415,7 +421,6 @@ MainItem::MainItem()
 	, handleItem{}
 	, equippedItems{}
 {
-	
 }
 MainItem::~MainItem()
 {

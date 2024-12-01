@@ -155,7 +155,6 @@ public:
 	// 장비해체 할건지 물어봄(여기서는 장비 해체만 가능)
 	void TotalequippedItems();
 private:
-	
 	// 아이템의 실제 저장공간
 	vector<NewItemInfo>  ItemBag;
 	//손에 있는 아이템

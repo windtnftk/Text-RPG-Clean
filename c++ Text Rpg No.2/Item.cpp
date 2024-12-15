@@ -100,10 +100,12 @@ void MainItem::UseItemManuOpen()
 {
 	OpenItemBag();
 	// 아이템 을 고르고 사용을 할지 정하자
+	std::cout << "아이템 사용하시겠습니까?" << std::endl;
+	if (!Yes_No()) return;
 	std::cout << std::endl << "사용하실 아이템을 고르세요" << std::endl;
-	UseItemChange(ItemBagId_to_cinAuto());
+	ItemId_Use(ItemBagId_to_cinAuto());
 }
-void MainItem::UseItemChange(ItemId id)
+void MainItem::ItemId_Use(ItemId id)
 {
 	// 소모성 아이템일경우
 	if (ItemTypeCheck(id)) UseItem(id); 
@@ -187,7 +189,6 @@ void MainItem::TotalequippedItems()
 	if (!Yes_No()) return;
 	std::cout << "어떤장비를 해체하시겠습니까?" << std::endl;
 	MoveEquipped(EquippedId_to_cinAuto());
-
 }
 bool MainItem::AddequippedItems(ItemId id)
 {

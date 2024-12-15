@@ -1,41 +1,64 @@
+#pragma once
 #include "pch.h"
 #include "EventManager.h"
-//#include "Dungeon.h"
-//#include "Ccore.h"
-
-//Node::Node()
-//	: E_Type(EventType::Treasure),
-//	left(nullptr),
-//	right(nullptr)
-//{
-//	
-//}
-Node::~Node()
-{
-	delete left;
-	delete right;
+#include "IEvent.h"
+#include "Dungeon.h"
+#include <chrono>
+#pragma message("IEvent.h included successfully")
+Dungeon::Dungeon(unsigned int seed)
+    : seed(seed), eventManager(seed), root(nullptr) {
+    generateDungeon();  // 던전 트리 생성
 }
-// 던전 생성자
-Dungeon::Dungeon(unsigned int seed) : seed(seed), eventManager(seed) {}
+
+Dungeon::Dungeon()
+    : seed(static_cast<unsigned int>(std::chrono::system_clock::now().time_since_epoch().count())),
+    eventManager(seed), root(nullptr) {
+    generateDungeon();
+}
+
+Dungeon::~Dungeon() {
+    delete root;
+}
+
+void Dungeon::generateDungeon(int depth) {
+    if (root) delete root;
+    root = generateNode(depth);
+}
+
+Node* Dungeon::generateNode(int depth) {
+    if (depth > 5) return nullptr;
+
+    std::unique_ptr<IEvent> event = eventManager.getRandomEvent();
+    Node* newNode = new Node(std::move(event));
+
+    newNode->left = generateNode(depth + 1);
+    newNode->right = generateNode(depth + 1);
+
+    return newNode;
+}
 
 void Dungeon::traverse(Node* node, int depth) {
-    if (!node) return;
+    if (!node || depth > 5) return;
 
-    // 동일한 EventManager 객체를 사용하여 이벤트를 트리거
-    eventManager.triggerEvent(node->E_Type, depth);
+    node->event->trigger(depth);
 
-    // 던전의 경로를 선택하고 재귀적으로 탐험
     if (node->left && node->right) {
-        std::cout << "Choose your path: [1] Left or [2] Right" << std::endl;
+        std::cout << "선택하세요: [1] 왼쪽 or [2] 오른쪽\n";
         int choice;
         std::cin >> choice;
 
-        if (choice == 1)
-            traverse(node->left, depth + 1);  // 깊이를 증가시키면서 왼쪽으로 탐험
-        else
-            traverse(node->right, depth + 1); // 깊이를 증가시키면서 오른쪽으로 탐험
+        if (choice == 1) traverse(node->left, depth + 1);
+        else traverse(node->right, depth + 1);
     }
     else {
-        std::cout << "No more paths. End of dungeon." << std::endl;
+        std::cout << "No more paths. End of dungeon.\n";
     }
+}
+
+void Dungeon::traverseDungeon() {
+    if (!root) {
+        std::cout << "Dungeon is empty. Generate it first.\n";
+        return;
+    }
+    traverse(root, 0);
 }

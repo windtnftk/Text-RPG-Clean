@@ -1,5 +1,5 @@
 #pragma once
-
+#include <unordered_set>
 enum class ItemId
 {
 	HealthPortion,
@@ -34,6 +34,11 @@ enum class ItemId
 	Equipment10,
 	End = 30,
 };
+enum class ItemType {
+	CONSUMABLE,  // ¼Ò¸ğ¼º ¾ÆÀÌÅÛ
+	WEAPON,      // ¹«±â
+	EQUIPMENT    // Àåºñ
+};
 enum ItemRarity {
 	COMMON,      // ÀÏ¹İ ¾ÆÀÌÅÛ 1~2 ¹ø
 	UNCOMMON,    // °í±Ş ¾ÆÀÌÅÛ 3~4 ¹ø
@@ -45,6 +50,8 @@ struct NewItemInfo
 {
 	string	Name; // ÀÌ¸§
 	ItemRarity Rarity; // ·¹¾îµµ
+	int			Money; // ¾ÆÀÌÅÛ °¡Ä¡
+	ItemType	Type;	// ¾ÆÀÌÅÛ Å¸ÀÔ
 	std::function<void()> effects;		// Âø¿ë½Ã È¿°ú
 	std::function<void()> removeEffects;// Å»Âø½Ã È¿°ú
 	bool E_Check = false;				// ÀåÂøµÇ¾î ÀÖ´ÂÁö Ã¼Å©, flase¸é »ç¿ëÇÏÁö ¾Ê°íÀÖ´Ù
@@ -193,25 +200,18 @@ private:
 	void RemoveEquipment10Effect();
 #pragma endregion
 };
-// ±×·¯´Ï±î ¾ÆÀÌÅÛÀ» »ç¿ëÇÒ¶§ ÀÌ¸§°ª¸¸ °¡Á®¿À¸é ¾î¶²¾ÆÀÌÅÛÀ» »ç¿ëµÇ´ÂÁö 
-// È®ÀÎµÇ°í »ç¿ëÇÏ´Â ÇÔ¼ö? ¸¦ ¸¸µé°í ½ÍÀº°ÅÀÚ³ª
-// enum class ´Â ±×·¸°Ô »ç¿ëÇÏ°í ¿©±â¿¡´Â °á±¹ ¹¹¸¦ ¸¸µé°í ½ÍÀº°Å³Ä 
-// ÀÏ´Ü ¸Å´ÏÀú·Î »ç¿ëÇÏ´Â°Å´Â ³ªÁß¿¡ ºĞ¸®ÇÏ°í ¸ğµç±â´ÉÀ» 
-// ÀÌ Å¬·¡½º¿¡ ¶§·Á³õ°í
-// ¸ğµâÈ­¸¦ ÃµÃµÈ÷ ÁøÇàÇÏÀÚ
-// Áö±İ ¾ÆÀÌÅÛÀ» Ãß°¡ÇÏ´Â ÇÔ¼ö´Â ¿ì¸®°¡ ÁøÇàÇÏ´Â 
-// ÇÔ¼ö¿¡¼­ ¸®½ºÆ®(º¯¼ö°¡ ¾Æ´Ñ ItemArr¿¡¼­ °¡Á®¿È)
-// ±×·¯¸é ¾ÆÀÌÅÛ ¹éÀº ±×´ë·Î ¾²°í ¾ÆÀÌÅÛ µµ°¨À» ½ÇÁ¦·Î ¸¸µé°í
-// °Å±â¿¡ ÀÖ´Â Á¤º¸¸¦ °¡Á®¿À´Â°Ô 
 
 class MainItem
 {
 	SINGLE(MainItem);
-public:
+
+public: // °ø°³ ÇÔ¼ö
 	// TODO: ¾ÆÁ÷ ¾ÆÀÌÅÛ Àåºñ ¶Ç´Â »ç¿ëÈ¿°ú Àû¿ëÀº ¼¼¼¼ÇÏ°Ô ±¸Çö ¾ÈÇßÀ½, ÃßÈÄ¿¡ ÇØ¾ßµÊ
+
 	// ¾ÆÀÌÅÛ init
-	void ItemInit();
+	void ItemInit(); 
 	// ¾ÆÀÌÅÛ »ç¿ëÇÏ´Â ÇÔ¼ö
+<<<<<<< HEAD
 	void UseItemManuOpen();
 	// Àåºñ ÇØÃ¼ ¹× °ü¸® ÃÑ°ü¸® ÇÔ¼ö
 	// ÀåÂøÇÑÀåºñ º¸¿©ÁÖ°í(¾øÀ¸¸é Àåºñ¾ø´Ù°í ¹Ù·Î¹İÈ¯)
@@ -256,11 +256,87 @@ private:
 	// ¼Ò¸ğ¼º¾ÆÀÌÅÛ »ç¿ëÇÏ°í »ç¿ëÇß´Ù¸é ¾ÆÀÌÅÛÄ­¿¡¼­ »èÁ¦ÇÏ´Â ÇÔ¼ö 1¹ø
 	void UsingItem();
 	
+=======
+	// ItemBagView -> Yes_or_No -> Yes ½Ã ItemId_Use ÁøÇà
+	void UseItemManuOpen(); 
+	// ¾ÆÀÌÅÛ Ã£¾ÆÁÖ´Â ÇÔ¼ö ±×¸®°í ¾ÆÀÌÅÛ ³ª¿­ ÇÏ´Â ÇÔ¼ö(publicÀ¸·Î ¹Ù²ÜÁö °í¹Î)
+	// 4. ItemBag È®ÀÎ ÇÏ´Â ÇÔ¼ö : ¾ÆÀÌÅÛ Id ¹× °³¼ö±îÁö¸¸ º¸¿©ÁÖ±â¸¸ ÇÔ
+	void OpenItemBag(); 
+	// TODO: È¿°ú Áßº¹°¡´É ¹®Á¦ ¹ÌÇØ°á
+	// ÀåÂø¾ÆÀÌÅÛ È®ÀÎ(view)
+	bool ViewEquippedItems();
+	// Àåºñ ÇØÃ¼ ¹× ÃÑ °ü¸® ÇÔ¼ö
+	// ÀåÂøÇÑÀåºñ view -> Yes_or_No -> Yes½Ã MoveEquipped ÁøÇà
+	void TotalequippedItems();
+
+private: // MainItem ³»ºÎ ÇÔ¼ö ÃÑ °ü¸® ÇÔ¼ö
+
+	// ¾ÆÀÌÅÛ, Àåºñ ÀÇ »ç¿ëÈ¿°ú¸¦ ±¸ºĞÇØ¼­ »ç¿ëÇÏ´Â ÇÔ¼ö
+	// ¾ÆÀÌÅÛ Type ÀÚµ¿±¸ºĞ_Áï½Ã¹ßµ¿, ¾ÆÀÌÅÛ ¹é¿¡ÀÖÀ» °æ¿ì¿¡ »ç¿ë
+	void ItemId_Use(ItemId id);
+
+	// 2.¼Ò¸ğ¼º ¾ÆÀÌÅÛ »ç¿ëÇÔ¼ö : ¿©±â¼­´Â ¾ÆÀÌÅÛ Id¸¦ ¹Ş°í ÀÌ°Ô ¼Ò¸ğ¼º ¾ÆÀÌÅÛÀÎÁö È®ÀÎÇÏ¿© ¸ÂÀ»°æ¿ì ÁøÇà
+	// ¼Ò¸ğ¼º ¾ÆÀÌÅÛ°ú ¹«±â ¾ÆÀÌÅÛ, Àåºñ¾ÆÀÌÅÛÀ» ¾ÆÀÌÅÛ µµ°¨¿¡¼­ ÀÌ °ªÀ» ¹Ş¾Æ¿À´Â ÇÔ¼ö»ı¼º
+	// ¿©±â¼­ ¾ÆÀÌÅÛ ¹«±â, Àåºñ ÀåÂø ÇÔ¼öµµ ÀÛµ¿ÇÏ°Ô ¸¸µé¾î¾ß°Ú´Ù
+	void UseItem(ItemId id);
+
+	// 3. Àåºñ ÀåÂø ÇÔ¼ö : ÀåºñµÈ ¾ÆÀÌÅÛÀ» °ü¸® ÇÒ º¯¼ö¿¡ ItemId ³Ö°í ¾ÆÀÌÅÛ È¿°ú ÇÔ¼ö Ãâ·Â
+	// ÁøÇàÁß ¾ÆÀÌÅÛ »èÁ¦µµ ÁøÇà , ¾ÆÀÌÅÛ ¹é¿¡¼­ °³¼ö 1°³¸¦ ³»¸®°í ±× ÈÄ¿¡ 0°³°¡ µÉ°æ¿ì Id°ªµµ ¾ø¾Ö
+	void equippedUse(ItemId id);
+
+	// ÀåÂø¾ÆÀÌÅÛ ÇØÃ¼
+	void MoveEquipped(ItemId id);
+
+private: // itemBag »ç¿ë ÇÔ¼ö
+
+	// ItemId ÀÔ·ÂÇÏ¸é Àåºñ¿¡ Ãß°¡ÇÏ´Â ÇÔ¼ö
+	void AddItem(ItemId item);
+	// ItemId ÀÔ·ÂÇÏ¸é Àåºñ¿¡ Ãß°¡ÇÏ´Â ÇÔ¼ö, int°ª ³ÖÀ¸¸é ±× ¼ö¸¸Å­ ³ÖÀ½
+	void AddItem(ItemId item, int NUMBER);
+	// OpenItemBag¿¡ ¸ÂÃß¾î ItemId¸¦ ÀÎ¼ö¸¦ ÁÙ ÇÔ¼ö
+	ItemId ItemBagId_to_cinAuto();
+
+private:	//equippedItems »ç¿ë ÇÔ¼ö
+
+	// ItemId °¡ ÀÎ¼ö·Î µé¾î¿À¸é ÀåºñÃ¢¿¡ Ãß°¡ÇÏ´Â ÇÔ¼ö
+	// Àåºñ Ãß°¡ ½ÇÆĞ(°°Àº Àåºñ°¡ ÀÖÀ½ µî)½Ã falseÃâ·Â
+	bool AddequippedItems(ItemId id); 
+
+	// ItemId ÀÎ¼ö·Î ¹ŞÀ¸¸é Áö±İ id°¡ ÀåºñÃ¢¿¡ ÀÖ´Â ¾ÆÀÌÅÛ typeÇÏ°í ÈÄ¡´ÂÁö È®ÀÎ
+	// ÀåºñÃ¢ Å½»öÁß °°Àº ¾ÆÀÌÅÛÀÌ ÀåÂøµÇÁö ¾ÊÀº°ÍÀÌ È®ÀÎµÇ¸é true, ÈÄ¡¸é false
+	bool LikeItemtypeCheck(ItemId id); 
+	
+	// equippedItems¿¡ ¸ÂÃß¾î ItemId¸¦ ÀÎ¼ö¸¦ ÁÙ ÇÔ¼ö
+	ItemId EquippedId_to_cinAuto();
+
+private: // MainItem Class ³»ºÎ º¯È¯ ÇÔ¼ö
+
+	std::unordered_map<ItemId, int> ItemBag; // ¾ÆÀÌÅÛ °¡¹æ
+	std::unordered_set<ItemId> equippedItems; // ÀåºñÁßÀÎ Àåºñ
+
+	// ItemId È®ÀÎÇØ¼­ ¼Ò¸ğ¼º ¾ÆÀÌÅÛÀÎÁö È®ÀÎÇÏ´Â ÇÔ¼ö
+	// ¼Ò¸ğ¼º ¾ÆÀÌÅÛÀÏ°æ¿ì true Ãâ·Â
+	bool ItemTypeCheck(ItemId id);
+
+	// ItemId ÀÎ¼ö·Î ¹ŞÀ¸¸é ±×¿¡ ¸Â´Â ¾ÆÀÌÅÛ È¿°ú Ãâ·Â 
+	void ItemEffect(ItemId id) { ItemEncyclopedia::GetInst()->getNewItemInfo(id).effects; }
+
+	// ItemId ÀÎ¼ö·Î ¹ŞÀ¸¸é ±×¿¡ ¸Â´Â ¾ÆÀÌÅÛ »èÁ¦È¿°ú Ãâ·Â
+	// Àåºñ ¾ÆÀÌÅÛ »èÁ¦½Ã »ç¿ë
+	void RemoveItemEffect(ItemId id) { ItemEncyclopedia::GetInst()->getNewItemInfo(id).removeEffects; }
+
+	// ItemId ÀÎ¼ö·Î ¹ŞÀ¸¸é ÀÌ¸§ Ãâ·Â 
+	string ItemName(ItemId id) { return ItemEncyclopedia::GetInst()->getNewItemInfo(id).Name; }
+
+	// ItemId ÀÎ¼ö·Î ¹ŞÀ¸¸é ¾î¶²Á¾·ùÀÇ ¾ÆÀÌÅÛÀÎÁö ¾Ë·ÁÁÜ
+	ItemType Itemtype(ItemId id) { return ItemEncyclopedia::GetInst()->getNewItemInfo(id).Type; }
+>>>>>>> ItemClass-ì¥ì°©ì•„ì´í…œ-ë³€ìˆ˜-ì œê±°ì‘ì—…-ì „í™˜
 	// int°ª ÀÔ·ÂÇÏ¸é ItemId°ªÀ¸·Î º¯È¯ÇÏ´Â ÇÔ¼ö
 	ItemId convert(int Num) const
 	{
 		return static_cast<ItemId>(Num);
 	}
+<<<<<<< HEAD
 public:	//¾ÆÀÌÅÛ »ç¿ëÇÔ¼ö
 	
 	//ItemEncyclopedia Itemsub; // ¾ÆÀÌÅÛ µµ°¨
@@ -300,5 +376,7 @@ public:	//¾ÆÀÌÅÛ »ç¿ëÇÔ¼ö
 	
  
 
+=======
+>>>>>>> ItemClass-ì¥ì°©ì•„ì´í…œ-ë³€ìˆ˜-ì œê±°ì‘ì—…-ì „í™˜
 };
 

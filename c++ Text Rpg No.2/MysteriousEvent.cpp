@@ -1,5 +1,9 @@
 #include "pch.h"
+#include "IEvent.h"
 #include "MysteriousEvent.h"
+#include "EventManager.h"
+#pragma message("IEvent.h included successfully")
+
 
 void MysteriousEvent::Ez_Event1() const
 {
@@ -109,57 +113,3 @@ void MysteriousEvent::Hard_Event5() const
 
 }
 
-string MysteriousEvent::getEasyEventMessage() const
-{
-	switch (eventType)
-	{
-	case EventList::test1:
-		Ez_Event1();
-		break;
-	case EventList::test2:
-		Ez_Event2();
-		break;
-	case EventList::test3:
-		Ez_Event3();
-		break;
-	case EventList::test4:
-		Ez_Event4();
-		break;
-	case EventList::test5:
-		Ez_Event5();
-		break;
-	default:
-		break;
-	}
-	return string();
-}
-
-string MysteriousEvent::getHardEventMessage() const
-{
-	switch (eventType)
-	{
-	case EventList::test1:
-		Hard_Event1();
-		break;
-	case EventList::test2:
-		Hard_Event2();
-		break;
-	case EventList::test3:
-		Hard_Event3();
-		break;
-	case EventList::test4:
-		Hard_Event4();
-		break;
-	case EventList::test5:
-		Hard_Event5();
-		break;
-	default:
-		break;
-	}
-	return string();
-}
-
-void MysteriousEvent::StoreSetting() const
-{
-	/*MainItem::GetInst()->*/
-}

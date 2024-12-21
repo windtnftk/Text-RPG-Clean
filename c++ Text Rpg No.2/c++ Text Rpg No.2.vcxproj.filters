@@ -69,6 +69,12 @@
     <ClCompile Include="MysteriousEvent.cpp">
       <Filter>Dungeon\EventManager\Event Class</Filter>
     </ClCompile>
+    <ClCompile Include="IEvent.cpp">
+      <Filter>Dungeon\EventManager\Event Class</Filter>
+    </ClCompile>
+    <ClCompile Include="EnemyEvent.cpp">
+      <Filter>Dungeon\EventManager\Event Class</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -97,6 +103,12 @@
       <Filter>Dungeon\EventManager</Filter>
     </ClInclude>
     <ClInclude Include="MysteriousEvent.h">
+      <Filter>Dungeon\EventManager\Event Class</Filter>
+    </ClInclude>
+    <ClInclude Include="IEvent.h">
+      <Filter>Dungeon\EventManager\Event Class</Filter>
+    </ClInclude>
+    <ClInclude Include="EnemyEvent.h">
       <Filter>Dungeon\EventManager\Event Class</Filter>
     </ClInclude>
   </ItemGroup>

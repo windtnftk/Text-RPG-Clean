@@ -112,3 +112,4 @@ void MysteriousEvent::Hard_Event5() const
 	std::cout << "2) 방을 무시한다" << std::endl;
 
 }
+

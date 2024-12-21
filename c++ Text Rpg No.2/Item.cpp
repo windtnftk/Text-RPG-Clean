@@ -500,36 +500,48 @@ std::function<void()> ItemEncyclopedia::getRemoveEffectFunction(ItemId id) {
 	default: return []() { std::cout << "item 번호가 잘못되었습니다." << std::endl; };
 	}
 }
-
+// 생성자
 ItemEncyclopedia::ItemEncyclopedia()
-	:itemData{}
-{
-	for (int i = 0, k = 0; i < static_cast<int>(ItemId::End); ++i)
-	{
-		ItemType it;
-		k = (i % 10) / 2; // 아이템 레어도 맞추기
-		ItemId id = Id_Convert(i);
-		if (id < ItemId::Weapon1)
-		{
-			it = ItemType::CONSUMABLE;
+	: itemData{} {
+	for (int id = 0; id < static_cast<int>(ItemId::End); ++id) {
+		// 0. 현재 반복문을 ItemId로 맞춤
+		ItemId index = Id_Convert(id);
+
+		// 1. 아이템 이름을 ItemArr에서 참조로 받아옴
+		const string& Name = ItemArr[id]; // 복사 대신 참조 사용
+
+		// 2. 아이템 레어도를 ItemId에 맞춰 조정
+		int Raritynumber = (id % 10) / 2;
+		ItemRarity Rarity = Rarity_Convert(Raritynumber);
+
+		// 3. 아이템 레어도에 따라 아이템의 가치 변화
+		int Rarity_to_Money = Raritynumber * 5;
+
+		// 4. 아이템 타입별로 분류
+		ItemType type;
+		if (index < ItemId::Weapon1) {
+			type = ItemType::CONSUMABLE;
 		}
-		else if (id < ItemId::Equipment1)
-		{
-			it = ItemType::WEAPON;
+		else if (index < ItemId::Equipment1) {
+			type = ItemType::WEAPON;
 		}
-		else
-		{
-			it = ItemType::EQUIPMENT;
+		else {
+			type = ItemType::EQUIPMENT;
 		}
-		itemData[id] = {
-			ItemArr[i],
-			Rarity_Convert(k),
-			it,
-			getEffectFunction(id),
-			getRemoveEffectFunction(id),false
-		};
+
+		// 5. 이동 연산자(std::move)로 복사 비용 제거
+		itemData[index] = std::move(NewItemInfo{
+			Name,                              // 참조된 아이템 이름
+			Rarity,                            // 아이템 레어도 저장
+			Rarity_to_Money,                   // 레어도에 따른 가치
+			type,                              // 아이템 타입
+			getEffectFunction(index),          // 효과 함수
+			getRemoveEffectFunction(index),    // 제거 효과 함수
+			false                              // 기타 정보
+			});
 	}
 }
+
 
 ItemEncyclopedia::~ItemEncyclopedia()
 {

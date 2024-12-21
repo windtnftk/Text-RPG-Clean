@@ -50,6 +50,7 @@ struct NewItemInfo
 {
 	string	Name; // 이름
 	ItemRarity Rarity; // 레어도
+	int			Money; // 아이템 가치
 	ItemType	Type;	// 아이템 타입
 	std::function<void()> effects;		// 착용시 효과
 	std::function<void()> removeEffects;// 탈착시 효과

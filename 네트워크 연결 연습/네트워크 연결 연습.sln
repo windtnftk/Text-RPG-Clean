@@ -1,0 +1,41 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.1.11312.151
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "네트워크 연결 연습(클라이언트)", "..\네트워크 연결 연습(클라이언트)\네트워크 연결 연습(클라이언트).vcxproj", "{B395DD37-CC1D-4F4A-9483-EB0101013D47}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "네트워크 연결 연습(멀티 서버)", "..\네트워크 연결 연습(멀티 클라이언트)\네트워크 연결 연습(멀티 클라이언트).vcxproj", "{3569B9E9-9613-40D6-8D5C-1099FE53B42F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B395DD37-CC1D-4F4A-9483-EB0101013D47}.Debug|x64.ActiveCfg = Debug|x64
+		{B395DD37-CC1D-4F4A-9483-EB0101013D47}.Debug|x64.Build.0 = Debug|x64
+		{B395DD37-CC1D-4F4A-9483-EB0101013D47}.Debug|x86.ActiveCfg = Debug|Win32
+		{B395DD37-CC1D-4F4A-9483-EB0101013D47}.Debug|x86.Build.0 = Debug|Win32
+		{B395DD37-CC1D-4F4A-9483-EB0101013D47}.Release|x64.ActiveCfg = Release|x64
+		{B395DD37-CC1D-4F4A-9483-EB0101013D47}.Release|x64.Build.0 = Release|x64
+		{B395DD37-CC1D-4F4A-9483-EB0101013D47}.Release|x86.ActiveCfg = Release|Win32
+		{B395DD37-CC1D-4F4A-9483-EB0101013D47}.Release|x86.Build.0 = Release|Win32
+		{3569B9E9-9613-40D6-8D5C-1099FE53B42F}.Debug|x64.ActiveCfg = Debug|x64
+		{3569B9E9-9613-40D6-8D5C-1099FE53B42F}.Debug|x64.Build.0 = Debug|x64
+		{3569B9E9-9613-40D6-8D5C-1099FE53B42F}.Debug|x86.ActiveCfg = Debug|Win32
+		{3569B9E9-9613-40D6-8D5C-1099FE53B42F}.Debug|x86.Build.0 = Debug|Win32
+		{3569B9E9-9613-40D6-8D5C-1099FE53B42F}.Release|x64.ActiveCfg = Release|x64
+		{3569B9E9-9613-40D6-8D5C-1099FE53B42F}.Release|x64.Build.0 = Release|x64
+		{3569B9E9-9613-40D6-8D5C-1099FE53B42F}.Release|x86.ActiveCfg = Release|Win32
+		{3569B9E9-9613-40D6-8D5C-1099FE53B42F}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4675E0A8-71FD-41A5-B028-74D0E74535F4}
+	EndGlobalSection
+EndGlobal

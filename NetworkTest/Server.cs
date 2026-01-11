@@ -215,7 +215,7 @@ namespace ServerApp
 
         private bool TryHandshake(PacketType ptype, byte[] payload, ClientSession session, Protocol.IP_Port ipPort)
         {
-            if (ptype != PacketType.Hello)
+            if (ptype != PacketType.C2S_Hello)
             {
                 Protocol_IO.Protocol_IO.SendErrorPacket(session.Socket, "handshake required");
                 return false;
@@ -228,8 +228,8 @@ namespace ServerApp
                 return false;
             }
 
-            int cur = Interlocked.Increment(ref _clientCount) - 1;
-            if (cur >= MaxClients)
+            int cur = Interlocked.Increment(ref _clientCount);
+            if (cur > MaxClients)
             {
                 Interlocked.Decrement(ref _clientCount);
                 string fullMsg = "현재 인원이 가득찼습니다.";
@@ -241,7 +241,7 @@ namespace ServerApp
 
             string welcome = $"Welcome. 현재 접속 인원: {cur}";
             byte[] welcomeBytes = Encoding.UTF8.GetBytes(welcome);
-            Protocol_IO.Protocol_IO.SendPacket(session.Socket, PacketType.Welcome, welcomeBytes, (uint)welcomeBytes.Length);
+            Protocol_IO.Protocol_IO.SendPacket(session.Socket, PacketType.S2C_Welcome, welcomeBytes, (uint)welcomeBytes.Length);
 
             Console.WriteLine($"핸드셰이크 완료: {(string.IsNullOrEmpty(ipPort.ip) ? "unknown" : ipPort.ip)}:{ipPort.port} -> 현재 접속 수: {cur}");
             return true;
@@ -271,10 +271,10 @@ namespace ServerApp
 
             switch (packetEvent.Type)
             {
-                case PacketType.Word:
+                case PacketType.C2S_ChatMessage:
                     HandleWord(packetEvent.Session.Socket, ipPort, packetEvent.Payload);
                     break;
-                case PacketType.Position:
+                case PacketType.C2S_PlaceStoneRequest:
                     if (!HandlePosition(packetEvent.Session.Socket, ipPort, packetEvent.Payload))
                     {
                         Protocol_IO.Protocol_IO.SendErrorPacket(packetEvent.Session.Socket, "bad position payload");
@@ -290,7 +290,7 @@ namespace ServerApp
         {
             string text = Encoding.UTF8.GetString(payload ?? Array.Empty<byte>());
             Console.WriteLine($"받은 단어({(string.IsNullOrEmpty(ipPort.ip) ? "unknown" : ipPort.ip)}:{ipPort.port}): {text}");
-            Protocol_IO.Protocol_IO.SendPacket(clientSock, PacketType.AckSucces, Array.Empty<byte>(), 0);
+            Protocol_IO.Protocol_IO.SendPacket(clientSock, PacketType.S2C_ChatMessage, Array.Empty<byte>(), 0);
         }
 
 
@@ -307,7 +307,7 @@ namespace ServerApp
             }
 
             Console.WriteLine($"받은 좌표({(string.IsNullOrEmpty(ipPort.ip) ? "unknown" : ipPort.ip)}:{ipPort.port}): ({x},{y})");
-            Protocol_IO.Protocol_IO.SendPacket(clientSock, PacketType.PositionSucces, Array.Empty<byte>(), 0);
+            Protocol_IO.Protocol_IO.SendPacket(clientSock, PacketType.S2C_PlaceStoneAck, Array.Empty<byte>(), 0);
             return true;
         }
 

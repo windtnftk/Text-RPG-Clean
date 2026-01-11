@@ -104,17 +104,17 @@ namespace Protocol_IO
             return true;
         }
 
-        public static bool SendWordPacket(Socket sock, string text) // 단어 전송
-        {
-            byte[] bytes = Encoding.UTF8.GetBytes(text ?? string.Empty);
-            return SendPacket(sock, PacketType.Word, bytes, (uint)bytes.Length);
-        }
+        //public static bool SendWordPacket(Socket sock, string text) // 단어 전송
+        //{
+        //    byte[] bytes = Encoding.UTF8.GetBytes(text ?? string.Empty);
+        //    return SendPacket(sock, PacketType.Word, bytes, (uint)bytes.Length);
+        //}
 
-        public static bool SendPositionPacket(Socket sock, uint x, uint y) // x,y 좌표 전송
-        {
-            byte[] payload = ProtocolHelper.PackPositionPayload(x, y);
-            return SendPacket(sock, PacketType.Position, payload, ProtocolHelper.POSITION_PAYLOAD_SIZE);
-        }
+        //public static bool SendPositionPacket(Socket sock, uint x, uint y) // x,y 좌표 전송
+        //{
+        //    byte[] payload = ProtocolHelper.PackPositionPayload(x, y);
+        //    return SendPacket(sock, PacketType.Position, payload, ProtocolHelper.POSITION_PAYLOAD_SIZE);
+        //}
 
         public static void SendErrorPacket(Socket socket, string msg) // 오류 패킷 전송
         {

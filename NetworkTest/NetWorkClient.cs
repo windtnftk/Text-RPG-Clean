@@ -31,7 +31,7 @@ namespace NetworkClientApp
 
                 // Hello -> Welcome 핸드셰이크
                 byte[] hello = Encoding.UTF8.GetBytes("Hello");
-                if (!Protocol_IO.Protocol_IO.SendPacket(_socket, PacketType.Hello, hello, (uint)hello.Length))
+                if (!Protocol_IO.Protocol_IO.SendPacket(_socket, PacketType.C2S_Hello, hello, (uint)hello.Length))
                 {
                     CleanupSocket();
                     return false;
@@ -43,7 +43,7 @@ namespace NetworkClientApp
                     return false;
                 }
 
-                if (rtype != PacketType.Welcome)
+                if (rtype != PacketType.S2C_Welcome)
                 {
                     CleanupSocket();
                     return false;
@@ -99,7 +99,7 @@ namespace NetworkClientApp
             byte[] bytes = Encoding.UTF8.GetBytes(msg ?? string.Empty);
             lock (_sendLock)
             {
-                return Protocol_IO.Protocol_IO.SendPacket(_socket, PacketType.Word, bytes, (uint)bytes.Length);
+                return Protocol_IO.Protocol_IO.SendPacket(_socket, PacketType.C2S_ChatMessage, bytes, (uint)bytes.Length);
             }
         }
 
@@ -110,7 +110,7 @@ namespace NetworkClientApp
             byte[] payload = ProtocolHelper.PackPositionPayload(x, y);
             lock (_sendLock)
             {
-                return Protocol_IO.Protocol_IO.SendPacket(_socket, PacketType.Position, payload, ProtocolHelper.POSITION_PAYLOAD_SIZE);
+                return Protocol_IO.Protocol_IO.SendPacket(_socket, PacketType.C2S_PlaceStoneRequest, payload, ProtocolHelper.POSITION_PAYLOAD_SIZE);
             }
         }
 

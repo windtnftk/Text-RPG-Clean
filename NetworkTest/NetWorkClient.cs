@@ -36,7 +36,7 @@ namespace NetworkClientApp
                     return false;
                 }
 
-                if (!Protocol_IO.Protocol_IO.ReceivePacket(_socket, out PacketType rtype, out byte[] rpayload))
+                if (!Protocol_IO.ProtocolIO.ReceivePacket(_socket, out PacketType rtype, out byte[] rpayload))
                 {
                     CleanupSocket();
                     return false;
@@ -127,7 +127,7 @@ namespace NetworkClientApp
             {
                 try
                 {
-                    if (!Protocol_IO.Protocol_IO.ReceivePacket(_socket, out PacketType type, out byte[] payload))
+                    if (!Protocol_IO.ProtocolIO.ReceivePacket(_socket, out PacketType type, out byte[] payload))
                     {
                         break;
                     }

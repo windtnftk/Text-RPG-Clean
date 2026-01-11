@@ -173,14 +173,14 @@ namespace ServerApp
 
         private void ClientWorker(ClientSession session)
         {
-            Protocol.IP_Port ipPort = Protocol_IO.Protocol_IO.GetIpPort(session.EndPoint);
+            Protocol.IP_Port ipPort = Protocol_IO.ProtocolIO.GetIpPort(session.EndPoint);
             bool handshakeDone = false;
 
             try
             {
                 while (_running)
                 {
-                    if (!Protocol_IO.Protocol_IO.ReceivePacket(session.Socket, out PacketType ptype, out byte[] payload))
+                    if (!Protocol_IO.ProtocolIO.ReceivePacket(session.Socket, out PacketType ptype, out byte[] payload))
                     {
                         LogDisconnectOrError(ipPort);
                         break;
@@ -266,7 +266,7 @@ namespace ServerApp
 
         private void HandlePacketEvent(PacketEvent packetEvent)
         {
-            Protocol.IP_Port ipPort = Protocol_IO.Protocol_IO.GetIpPort(packetEvent.Session.EndPoint);
+            Protocol.IP_Port ipPort = Protocol_IO.ProtocolIO.GetIpPort(packetEvent.Session.EndPoint);
 
             switch (packetEvent.Type)
             {
@@ -289,7 +289,7 @@ namespace ServerApp
         {
             string text = PacketSerializer.ParseString(payload);
             Console.WriteLine($"받은 단어({(string.IsNullOrEmpty(ipPort.ip) ? "unknown" : ipPort.ip)}:{ipPort.port}): {text}");
-            ServerSend.ChatMessage(clientSock);
+            ServerSend.ChatMessage(clientSock, text);
         }
 
 
@@ -301,7 +301,7 @@ namespace ServerApp
             }
 
             Console.WriteLine($"받은 좌표({(string.IsNullOrEmpty(ipPort.ip) ? "unknown" : ipPort.ip)}:{ipPort.port}): ({x},{y})");
-            ServerSend.PlaceStoneAck(clientSock);
+            ServerSend.PlaceStoneAck(clientSock, x, y);
             return true;
         }
 

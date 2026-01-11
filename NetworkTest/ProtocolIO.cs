@@ -6,7 +6,7 @@ using Protocol;
 
 namespace Protocol_IO
 {
-    public static class Protocol_IO
+    public static class ProtocolIO
     {
         public static bool SendAll(Socket socket, byte[] data, int len)
         {
@@ -70,7 +70,7 @@ namespace Protocol_IO
 
         public static bool ReceivePacket(Socket socket, out PacketType outType, out byte[] outPayload)
         {
-            outType = PacketType.Error;
+            outType = PacketType.S2C_Error;
             outPayload = Array.Empty<byte>();
 
             byte[] header = new byte[8];

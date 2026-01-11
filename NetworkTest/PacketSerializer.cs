@@ -18,6 +18,11 @@ namespace Protocol
             return BuildString(text ?? string.Empty);
         }
 
+        public static byte[] BuildChatMessage(string text)
+        {
+            return BuildChat(text);
+        }
+
         public static byte[] BuildWelcome(string text)
         {
             return BuildString(text ?? string.Empty);

@@ -16,8 +16,6 @@ namespace Protocol
 
     public enum PacketType : uint
     {
-        Error = 255,
-
         None = 0,                           // (디버그/초기값)
 
         // -----------------------------
@@ -43,6 +41,7 @@ namespace Protocol
         S2C_PlaceStoneAck = 2002,           // 돌 두기 승인 (x,y,stone)
         //S2C_PlaceStoneNack = 2003,          // 돌 두기 거부 (reasonCode)
         S2C_ChatMessage = 2004,             // 채팅 전달 (senderId + len + utf8 bytes)
+        S2C_Error = 2005,                   // 오류 응답 (msg)
         //S2C_StateSnapshot = 2005,           // 상태 스냅샷 (state + roomId + myColor + turnColor + ...)
 
         //S2C_MatchFound = 2010,              // 상대 찾음/룸 생성됨 (roomId + myColor 등)

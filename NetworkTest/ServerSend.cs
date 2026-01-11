@@ -9,25 +9,25 @@ namespace NetworkSend
         public static bool Welcome(Socket socket, string text)
         {
             byte[] payload = PacketSerializer.BuildWelcome(text);
-            return Protocol_IO.Protocol_IO.SendPacket(socket, PacketType.S2C_Welcome, payload, (uint)payload.Length);
+            return Protocol_IO.ProtocolIO.SendPacket(socket, PacketType.S2C_Welcome, payload, (uint)payload.Length);
         }
 
-        public static bool ChatMessage(Socket socket)
+        public static bool ChatMessage(Socket socket, string text)
         {
-            byte[] payload = PacketSerializer.BuildEmpty();
-            return Protocol_IO.Protocol_IO.SendPacket(socket, PacketType.S2C_ChatMessage, payload, (uint)payload.Length);
+            byte[] payload = PacketSerializer.BuildChatMessage(text);
+            return Protocol_IO.ProtocolIO.SendPacket(socket, PacketType.S2C_ChatMessage, payload, (uint)payload.Length);
         }
 
-        public static bool PlaceStoneAck(Socket socket)
+        public static bool PlaceStoneAck(Socket socket, uint x, uint y)
         {
-            byte[] payload = PacketSerializer.BuildEmpty();
-            return Protocol_IO.Protocol_IO.SendPacket(socket, PacketType.S2C_PlaceStoneAck, payload, (uint)payload.Length);
+            byte[] payload = PacketSerializer.BuildPlace(x, y);
+            return Protocol_IO.ProtocolIO.SendPacket(socket, PacketType.S2C_PlaceStoneAck, payload, (uint)payload.Length);
         }
 
         public static bool Error(Socket socket, string text)
         {
             byte[] payload = PacketSerializer.BuildError(text);
-            return Protocol_IO.Protocol_IO.SendPacket(socket, PacketType.Error, payload, (uint)payload.Length);
+            return Protocol_IO.ProtocolIO.SendPacket(socket, PacketType.S2C_Error, payload, (uint)payload.Length);
         }
     }
 }

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using Protocol;
 using Protocol_IO;
+using NetworkSend;
 
 namespace NetworkClientApp
 {
@@ -30,8 +30,7 @@ namespace NetworkClientApp
                 _socket.Connect(host, port);
 
                 // Hello -> Welcome 핸드셰이크
-                byte[] hello = Encoding.UTF8.GetBytes("Hello");
-                if (!Protocol_IO.Protocol_IO.SendPacket(_socket, PacketType.C2S_Hello, hello, (uint)hello.Length))
+                if (!ClientSend.Hello(_socket))
                 {
                     CleanupSocket();
                     return false;
@@ -96,10 +95,9 @@ namespace NetworkClientApp
         {
             if (!_connected || _socket == null) return false;
 
-            byte[] bytes = Encoding.UTF8.GetBytes(msg ?? string.Empty);
             lock (_sendLock)
             {
-                return Protocol_IO.Protocol_IO.SendPacket(_socket, PacketType.C2S_ChatMessage, bytes, (uint)bytes.Length);
+                return ClientSend.Chat(_socket, msg);
             }
         }
 
@@ -107,10 +105,9 @@ namespace NetworkClientApp
         {
             if (!_connected || _socket == null) return false;
 
-            byte[] payload = ProtocolHelper.PackPositionPayload(x, y);
             lock (_sendLock)
             {
-                return Protocol_IO.Protocol_IO.SendPacket(_socket, PacketType.C2S_PlaceStoneRequest, payload, ProtocolHelper.POSITION_PAYLOAD_SIZE);
+                return ClientSend.Place(_socket, x, y);
             }
         }
 

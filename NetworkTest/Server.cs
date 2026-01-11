@@ -2,10 +2,10 @@
 using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using Protocol;
 using Protocol_IO;
+using NetworkSend;
 
 namespace ServerApp
 {
@@ -173,14 +173,14 @@ namespace ServerApp
 
         private void ClientWorker(ClientSession session)
         {
-            Protocol.IP_Port ipPort = Protocol_IO.Protocol_IO.GetIpPort(session.EndPoint);
+            Protocol.IP_Port ipPort = Protocol_IO.ProtocolIO.GetIpPort(session.EndPoint);
             bool handshakeDone = false;
 
             try
             {
                 while (_running)
                 {
-                    if (!Protocol_IO.Protocol_IO.ReceivePacket(session.Socket, out PacketType ptype, out byte[] payload))
+                    if (!Protocol_IO.ProtocolIO.ReceivePacket(session.Socket, out PacketType ptype, out byte[] payload))
                     {
                         LogDisconnectOrError(ipPort);
                         break;
@@ -217,14 +217,14 @@ namespace ServerApp
         {
             if (ptype != PacketType.C2S_Hello)
             {
-                Protocol_IO.Protocol_IO.SendErrorPacket(session.Socket, "handshake required");
+                ServerSend.Error(session.Socket, "handshake required");
                 return false;
             }
 
-            string msg = Encoding.UTF8.GetString(payload ?? Array.Empty<byte>());
+            string msg = PacketSerializer.ParseString(payload);
             if (msg != "Hello")
             {
-                Protocol_IO.Protocol_IO.SendErrorPacket(session.Socket, "invalid hello payload");
+                ServerSend.Error(session.Socket, "invalid hello payload");
                 return false;
             }
 
@@ -233,15 +233,14 @@ namespace ServerApp
             {
                 Interlocked.Decrement(ref _clientCount);
                 string fullMsg = "현재 인원이 가득찼습니다.";
-                Protocol_IO.Protocol_IO.SendErrorPacket(session.Socket, fullMsg);
+                ServerSend.Error(session.Socket, fullMsg);
                 Console.WriteLine($"거부된 연결({(string.IsNullOrEmpty(ipPort.ip) ? "unknown" : ipPort.ip)}:{ipPort.port}) - 서버가 가득 참 (현재: {cur})");
                 return false;
             }
 
 
             string welcome = $"Welcome. 현재 접속 인원: {cur}";
-            byte[] welcomeBytes = Encoding.UTF8.GetBytes(welcome);
-            Protocol_IO.Protocol_IO.SendPacket(session.Socket, PacketType.S2C_Welcome, welcomeBytes, (uint)welcomeBytes.Length);
+            ServerSend.Welcome(session.Socket, welcome);
 
             Console.WriteLine($"핸드셰이크 완료: {(string.IsNullOrEmpty(ipPort.ip) ? "unknown" : ipPort.ip)}:{ipPort.port} -> 현재 접속 수: {cur}");
             return true;
@@ -267,7 +266,7 @@ namespace ServerApp
 
         private void HandlePacketEvent(PacketEvent packetEvent)
         {
-            Protocol.IP_Port ipPort = Protocol_IO.Protocol_IO.GetIpPort(packetEvent.Session.EndPoint);
+            Protocol.IP_Port ipPort = Protocol_IO.ProtocolIO.GetIpPort(packetEvent.Session.EndPoint);
 
             switch (packetEvent.Type)
             {
@@ -277,37 +276,32 @@ namespace ServerApp
                 case PacketType.C2S_PlaceStoneRequest:
                     if (!HandlePosition(packetEvent.Session.Socket, ipPort, packetEvent.Payload))
                     {
-                        Protocol_IO.Protocol_IO.SendErrorPacket(packetEvent.Session.Socket, "bad position payload");
+                        ServerSend.Error(packetEvent.Session.Socket, "bad position payload");
                     }
                     break;
                 default:
-                    Protocol_IO.Protocol_IO.SendErrorPacket(packetEvent.Session.Socket, "unknown type");
+                    ServerSend.Error(packetEvent.Session.Socket, "unknown type");
                     break;
             }
         }
 
         private static void HandleWord(Socket clientSock, Protocol.IP_Port ipPort, byte[] payload)
         {
-            string text = Encoding.UTF8.GetString(payload ?? Array.Empty<byte>());
+            string text = PacketSerializer.ParseString(payload);
             Console.WriteLine($"받은 단어({(string.IsNullOrEmpty(ipPort.ip) ? "unknown" : ipPort.ip)}:{ipPort.port}): {text}");
-            Protocol_IO.Protocol_IO.SendPacket(clientSock, PacketType.S2C_ChatMessage, Array.Empty<byte>(), 0);
+            ServerSend.ChatMessage(clientSock, text);
         }
 
 
         private static bool HandlePosition(Socket clientSock, Protocol.IP_Port ipPort, byte[] payload)
         {
-            if (payload == null || payload.Length != ProtocolHelper.POSITION_PAYLOAD_SIZE)
-            {
-                return false;
-            }
-
-            if (!ProtocolHelper.UnpackPositionPayload(payload, out uint x, out uint y))
+            if (!PacketSerializer.TryParsePlace(payload, out uint x, out uint y))
             {
                 return false;
             }
 
             Console.WriteLine($"받은 좌표({(string.IsNullOrEmpty(ipPort.ip) ? "unknown" : ipPort.ip)}:{ipPort.port}): ({x},{y})");
-            Protocol_IO.Protocol_IO.SendPacket(clientSock, PacketType.S2C_PlaceStoneAck, Array.Empty<byte>(), 0);
+            ServerSend.PlaceStoneAck(clientSock, x, y);
             return true;
         }
 

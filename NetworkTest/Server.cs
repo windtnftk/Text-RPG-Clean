@@ -6,6 +6,7 @@ using System.Threading;
 using Protocol;
 using Protocol_IO;
 using NetworkSend;
+using System.Collections.Generic;
 
 namespace ServerApp
 {
@@ -15,12 +16,16 @@ namespace ServerApp
         private const int MaxClients = 2;
 
         private readonly Socket _listenSocket;
-        private readonly ConcurrentDictionary<ClientSession, Thread> _sessionWorkers = new();
+        private readonly ConcurrentDictionary<ClientSession, Thread> _pendingSessions = new();
         private readonly ConcurrentQueue<PacketEvent> _inboundQueue = new();
+        private readonly UserManager _userManager = new();
+        private readonly Dictionary<int, Room> _rooms = new();
         private volatile bool _running;
         private Thread _acceptThread;
         private Thread _logicThread;
         private int _clientCount = 0;
+        private int _nextRoomId = 1;
+        private int? _waitingUserId;
         private bool _disposed;
 
         public Server()
@@ -95,17 +100,18 @@ namespace ServerApp
             JoinThread(_acceptThread);
             JoinThread(_logicThread);
 
-            foreach (var kvp in _sessionWorkers)
+            foreach (var kvp in _pendingSessions)
             {
                 SafeCloseSession(kvp.Key);
             }
 
-            foreach (var kvp in _sessionWorkers)
+            foreach (var kvp in _pendingSessions)
             {
                 JoinThread(kvp.Value);
             }
 
-            _sessionWorkers.Clear();
+            _pendingSessions.Clear();
+            _userManager.CloseAll();
         }
 
         public void Dispose()
@@ -160,7 +166,7 @@ namespace ServerApp
 
                 var session = new ClientSession(clientSocket, endPoint);
                 var worker = new Thread(() => ClientWorker(session)) { IsBackground = true };
-                if (_sessionWorkers.TryAdd(session, worker))
+                if (_pendingSessions.TryAdd(session, worker))
                 {
                     worker.Start();
                 }
@@ -175,6 +181,7 @@ namespace ServerApp
         {
             Protocol.IP_Port ipPort = Protocol_IO.ProtocolIO.GetIpPort(session.EndPoint);
             bool handshakeDone = false;
+            int userId = 0;
 
             try
             {
@@ -193,10 +200,12 @@ namespace ServerApp
                             break;
                         }
                         handshakeDone = true;
+                        _pendingSessions.TryRemove(session, out Thread workerThread);
+                        userId = _userManager.RegisterUser(session, workerThread ?? Thread.CurrentThread);
                         continue;
                     }
 
-                    _inboundQueue.Enqueue(new PacketEvent(session, ptype, payload));
+                    _inboundQueue.Enqueue(new PacketEvent(userId, ptype, payload));
                 }
             }
             finally
@@ -206,9 +215,14 @@ namespace ServerApp
                     int newCount = Interlocked.Decrement(ref _clientCount);
                     if (newCount < 0) Interlocked.Exchange(ref _clientCount, 0);
                     Console.WriteLine($"접속 해제: {(string.IsNullOrEmpty(ipPort.ip) ? "unknown" : ipPort.ip)}:{ipPort.port} -> 현재 접속 수: {Math.Max(0, _clientCount)}");
+                    _userManager.OnDisconnect(userId);
+                    if (_waitingUserId == userId)
+                    {
+                        _waitingUserId = null;
+                    }
                 }
 
-                _sessionWorkers.TryRemove(session, out _);
+                _pendingSessions.TryRemove(session, out _);
                 SafeCloseSession(session);
             }
         }
@@ -266,43 +280,130 @@ namespace ServerApp
 
         private void HandlePacketEvent(PacketEvent packetEvent)
         {
-            Protocol.IP_Port ipPort = Protocol_IO.ProtocolIO.GetIpPort(packetEvent.Session.EndPoint);
+            if (!_userManager.TryGetSession(packetEvent.UserId, out ClientSession session))
+            {
+                return;
+            }
+
+            Protocol.IP_Port ipPort = Protocol_IO.ProtocolIO.GetIpPort(session.EndPoint);
 
             switch (packetEvent.Type)
             {
                 case PacketType.C2S_ChatMessage:
-                    HandleWord(packetEvent.Session.Socket, ipPort, packetEvent.Payload);
+                    HandleMatchOrChat(packetEvent.UserId, session.Socket, ipPort, packetEvent.Payload);
                     break;
                 case PacketType.C2S_PlaceStoneRequest:
-                    if (!HandlePosition(packetEvent.Session.Socket, ipPort, packetEvent.Payload))
-                    {
-                        ServerSend.Error(packetEvent.Session.Socket, "bad position payload");
-                    }
+                    HandlePosition(packetEvent.UserId, session.Socket, ipPort, packetEvent.Payload);
                     break;
                 default:
-                    ServerSend.Error(packetEvent.Session.Socket, "unknown type");
+                    ServerSend.Error(session.Socket, "unknown type");
                     break;
             }
         }
 
-        private static void HandleWord(Socket clientSock, Protocol.IP_Port ipPort, byte[] payload)
+        private void HandleMatchOrChat(int userId, Socket clientSock, Protocol.IP_Port ipPort, byte[] payload)
         {
-            string text = PacketSerializer.ParseString(payload);
-            Console.WriteLine($"받은 단어({(string.IsNullOrEmpty(ipPort.ip) ? "unknown" : ipPort.ip)}:{ipPort.port}): {text}");
-            ServerSend.ChatMessage(clientSock, text);
+            if (!_userManager.TryGetUser(userId, out SessionInfo info))
+            {
+                return;
+            }
+
+            if (info.State == UserState.InRoom && info.RoomId.HasValue && _rooms.TryGetValue(info.RoomId.Value, out Room room))
+            {
+                string text = PacketSerializer.ParseString(payload);
+                Console.WriteLine($"받은 단어({(string.IsNullOrEmpty(ipPort.ip) ? "unknown" : ipPort.ip)}:{ipPort.port}): {text}");
+                foreach (int playerId in room.GetPlayers())
+                {
+                    if (_userManager.TryGetSession(playerId, out ClientSession playerSession))
+                    {
+                        ServerSend.ChatMessage(playerSession.Socket, text);
+                    }
+                }
+                return;
+            }
+
+            HandleMatchRequest(userId);
         }
 
 
-        private static bool HandlePosition(Socket clientSock, Protocol.IP_Port ipPort, byte[] payload)
+        private void HandlePosition(int userId, Socket clientSock, Protocol.IP_Port ipPort, byte[] payload)
         {
             if (!PacketSerializer.TryParsePlace(payload, out uint x, out uint y))
             {
-                return false;
+                ServerSend.Error(clientSock, "bad position payload");
+                return;
             }
 
             Console.WriteLine($"받은 좌표({(string.IsNullOrEmpty(ipPort.ip) ? "unknown" : ipPort.ip)}:{ipPort.port}): ({x},{y})");
-            ServerSend.PlaceStoneAck(clientSock, x, y);
-            return true;
+            if (!_userManager.TryGetUser(userId, out SessionInfo info) || !info.RoomId.HasValue)
+            {
+                ServerSend.Error(clientSock, "not in room");
+                return;
+            }
+
+            if (!_rooms.TryGetValue(info.RoomId.Value, out Room room))
+            {
+                ServerSend.Error(clientSock, "room not found");
+                return;
+            }
+
+            if (!room.TryPlace(userId, x, y, out string rejectReason))
+            {
+                ServerSend.Error(clientSock, rejectReason ?? "invalid move");
+                return;
+            }
+
+            foreach (int playerId in room.GetPlayers())
+            {
+                if (_userManager.TryGetSession(playerId, out ClientSession playerSession))
+                {
+                    ServerSend.PlaceStoneAck(playerSession.Socket, x, y);
+                }
+            }
+        }
+
+        private void HandleMatchRequest(int userId)
+        {
+            if (!_userManager.TryGetUser(userId, out SessionInfo info))
+            {
+                return;
+            }
+
+            if (info.State != UserState.Connected)
+            {
+                return;
+            }
+
+            _userManager.SetState(userId, UserState.Matching);
+
+            if (_waitingUserId == null)
+            {
+                _waitingUserId = userId;
+                return;
+            }
+
+            if (_waitingUserId == userId)
+            {
+                return;
+            }
+
+            int opponentId = _waitingUserId.Value;
+            if (!_userManager.TryGetUser(opponentId, out SessionInfo opponentInfo) || opponentInfo.State != UserState.Matching)
+            {
+                _waitingUserId = userId;
+                return;
+            }
+
+            int roomId = _nextRoomId++;
+            var room = new Room(roomId, opponentId, userId);
+            room.Start();
+            _rooms[roomId] = room;
+
+            _userManager.SetRoom(opponentId, roomId);
+            _userManager.SetRoom(userId, roomId);
+            _userManager.SetState(opponentId, UserState.InRoom);
+            _userManager.SetState(userId, UserState.InRoom);
+            _waitingUserId = null;
         }
 
         private static void LogDisconnectOrError(Protocol.IP_Port ipPort)
@@ -355,19 +456,7 @@ namespace ServerApp
             }
         }
 
-        private readonly struct PacketEvent
-        {
-            public ClientSession Session { get; }
-            public PacketType Type { get; }
-            public byte[] Payload { get; }
-
-            public PacketEvent(ClientSession session, PacketType type, byte[] payload)
-            {
-                Session = session;
-                Type = type;
-                Payload = payload;
-            }
-        }
+        private record PacketEvent(int UserId, PacketType Type, byte[] Payload);
 
     }
 }

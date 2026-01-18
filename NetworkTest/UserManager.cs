@@ -97,11 +97,7 @@ namespace ServerApp
         {
             lock (_lock)
             {
-                if (_users.TryGetValue(userId, out SessionInfo info))
-                {
-                    info.State = UserState.Disconnected;
-                    info.RoomId = null;
-                }
+                _users.Remove(userId);
             }
         }
 
@@ -111,6 +107,7 @@ namespace ServerApp
             lock (_lock)
             {
                 sessions = new List<SessionInfo>(_users.Values);
+                _users.Clear();
             }
 
             foreach (var info in sessions)

@@ -18,6 +18,7 @@ namespace ServerApp
         private readonly Socket _listenSocket;
         private readonly ConcurrentDictionary<ClientSession, Thread> _pendingSessions = new();
         private readonly ConcurrentQueue<PacketEvent> _inboundQueue = new();
+        private readonly ConcurrentQueue<SystemEvent> _systemQueue = new();
         private readonly UserManager _userManager = new();
         private readonly Dictionary<int, Room> _rooms = new();
         private volatile bool _running;
@@ -215,11 +216,7 @@ namespace ServerApp
                     int newCount = Interlocked.Decrement(ref _clientCount);
                     if (newCount < 0) Interlocked.Exchange(ref _clientCount, 0);
                     Console.WriteLine($"접속 해제: {(string.IsNullOrEmpty(ipPort.ip) ? "unknown" : ipPort.ip)}:{ipPort.port} -> 현재 접속 수: {Math.Max(0, _clientCount)}");
-                    _userManager.OnDisconnect(userId);
-                    if (_waitingUserId == userId)
-                    {
-                        _waitingUserId = null;
-                    }
+                    _systemQueue.Enqueue(new SystemEvent(SystemEventType.Disconnect, userId));
                 }
 
                 _pendingSessions.TryRemove(session, out _);
@@ -264,12 +261,22 @@ namespace ServerApp
         {
             while (_running)
             {
+                while (_systemQueue.TryDequeue(out SystemEvent systemEvent))
+                {
+                    HandleSystemEvent(systemEvent);
+                }
+
                 while (_inboundQueue.TryDequeue(out PacketEvent packetEvent))
                 {
                     HandlePacketEvent(packetEvent);
                 }
 
                 Thread.Sleep(10);
+            }
+
+            while (_systemQueue.TryDequeue(out SystemEvent remainingSystem))
+            {
+                HandleSystemEvent(remainingSystem);
             }
 
             while (_inboundQueue.TryDequeue(out PacketEvent remaining))
@@ -406,6 +413,20 @@ namespace ServerApp
             _waitingUserId = null;
         }
 
+        private void HandleSystemEvent(SystemEvent systemEvent)
+        {
+            switch (systemEvent.Type)
+            {
+                case SystemEventType.Disconnect:
+                    if (_waitingUserId == systemEvent.UserId)
+                    {
+                        _waitingUserId = null;
+                    }
+                    _userManager.OnDisconnect(systemEvent.UserId);
+                    break;
+            }
+        }
+
         private static void LogDisconnectOrError(Protocol.IP_Port ipPort)
         {
             Console.WriteLine($"클라이언트 연결 종료: {(string.IsNullOrEmpty(ipPort.ip) ? "unknown" : ipPort.ip)}:{ipPort.port}");
@@ -457,6 +478,12 @@ namespace ServerApp
         }
 
         private record PacketEvent(int UserId, PacketType Type, byte[] Payload);
+        private enum SystemEventType
+        {
+            Disconnect
+        }
+
+        private record SystemEvent(SystemEventType Type, int UserId);
 
     }
 }

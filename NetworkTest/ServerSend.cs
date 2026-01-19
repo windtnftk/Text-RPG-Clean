@@ -29,5 +29,12 @@ namespace NetworkSend
             byte[] payload = PacketSerializer.BuildError(text);
             return Protocol_IO.ProtocolIO.SendPacket(socket, PacketType.S2C_Error, payload, (uint)payload.Length);
         }
+
+        public static bool MatchFound(Socket socket, int roomId, uint myColor, bool isMyTurn)
+        {
+            uint turnFlag = isMyTurn ? 1u : 0u;
+            byte[] payload = PacketSerializer.MakeMatchFound(roomId, myColor, turnFlag);
+            return Protocol_IO.ProtocolIO.SendPacket(socket, PacketType.S2C_MatchFound, payload, (uint)payload.Length);
+        }
     }
 }

@@ -7,6 +7,7 @@ namespace Protocol
     public static class PacketSerializer
     {
         public const uint PositionPayloadSize = 8u;
+        private const int MatchFoundPayloadSize = 12;
 
         public static byte[] BuildHello()
         {
@@ -44,6 +45,32 @@ namespace Protocol
         public static byte[] BuildEmpty()
         {
             return Array.Empty<byte>();
+        }
+
+        public static byte[] MakeMatchFound(int roomId, uint myColor, uint isMyTurn)
+        {
+            var buffer = new byte[MatchFoundPayloadSize];
+            BinaryPrimitives.WriteInt32BigEndian(buffer.AsSpan(0, 4), roomId);
+            BinaryPrimitives.WriteUInt32BigEndian(buffer.AsSpan(4, 4), myColor);
+            BinaryPrimitives.WriteUInt32BigEndian(buffer.AsSpan(8, 4), isMyTurn);
+            return buffer;
+        }
+
+        public static bool TryParseMatchFound(ReadOnlySpan<byte> payload, out int roomId, out uint myColor, out uint isMyTurn)
+        {
+            roomId = 0;
+            myColor = 0;
+            isMyTurn = 0;
+
+            if (payload.Length != MatchFoundPayloadSize)
+            {
+                return false;
+            }
+
+            roomId = BinaryPrimitives.ReadInt32BigEndian(payload.Slice(0, 4));
+            myColor = BinaryPrimitives.ReadUInt32BigEndian(payload.Slice(4, 4));
+            isMyTurn = BinaryPrimitives.ReadUInt32BigEndian(payload.Slice(8, 4));
+            return true;
         }
 
         public static string ParseString(ReadOnlySpan<byte> payload)

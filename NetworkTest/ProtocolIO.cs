@@ -61,7 +61,7 @@ namespace Protocol_IO
                 BinaryPrimitives.WriteUInt32BigEndian(header.AsSpan(0, 4), (uint)type);
                 BinaryPrimitives.WriteUInt32BigEndian(header.AsSpan(4, 4), len);
 
-                if (!SendAll(socket, header.ToArray(), header.Length))
+                if (!SendAll(socket, header, header.Length))
                 {
                     Console.Error.WriteLine("SendPacket: 헤더 전송 실패");
                     return false;

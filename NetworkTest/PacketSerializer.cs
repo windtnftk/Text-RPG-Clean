@@ -56,6 +56,7 @@ namespace Protocol
             return buffer;
         }
 
+        // 클라 전용
         public static bool TryParseMatchFound(ReadOnlySpan<byte> payload, out int roomId, out uint myColor, out uint isMyTurn)
         {
             roomId = 0;

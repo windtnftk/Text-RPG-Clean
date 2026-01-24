@@ -23,5 +23,17 @@ namespace NetworkSend
             byte[] payload = PacketSerializer.BuildPlace(x, y);
             return Protocol_IO.ProtocolIO.SendPacket(socket, PacketType.C2S_PlaceStoneRequest, payload, (uint)payload.Length);
         }
+
+        public static bool MatchRequest(Socket socket)
+        {
+            byte[] payload = PacketSerializer.BuildEmpty();
+            return Protocol_IO.ProtocolIO.SendPacket(socket, PacketType.C2S_MatchRequest, payload, (uint)payload.Length);
+        }
+
+        public static bool EndGame(Socket socket)
+        {
+            byte[] payload = PacketSerializer.BuildEmpty();
+            return Protocol_IO.ProtocolIO.SendPacket(socket, PacketType.C2S_EndGame, payload, (uint)payload.Length);
+        }
     }
 }

@@ -297,10 +297,16 @@ namespace ServerApp
             switch (packetEvent.Type)
             {
                 case PacketType.C2S_ChatMessage:
-                    HandleMatchOrChat(packetEvent.UserId, session.Socket, ipPort, packetEvent.Payload);
+                    HandleChatMessage(packetEvent.UserId, session.Socket, ipPort, packetEvent.Payload);
+                    break;
+                case PacketType.C2S_MatchRequest:
+                    HandleMatchRequest(packetEvent.UserId);
                     break;
                 case PacketType.C2S_PlaceStoneRequest:
                     HandlePosition(packetEvent.UserId, session.Socket, ipPort, packetEvent.Payload);
+                    break;
+                case PacketType.C2S_EndGame:
+                    HandleEndGame(packetEvent.UserId);
                     break;
                 default:
                     ServerSend.Error(session.Socket, "unknown type");
@@ -308,7 +314,7 @@ namespace ServerApp
             }
         }
 
-        private void HandleMatchOrChat(int userId, Socket clientSock, Protocol.IP_Port ipPort, byte[] payload)
+        private void HandleChatMessage(int userId, Socket clientSock, Protocol.IP_Port ipPort, byte[] payload)
         {
             if (!_userManager.TryGetUser(userId, out SessionInfo info))
             {
@@ -326,10 +332,7 @@ namespace ServerApp
                         ServerSend.ChatMessage(playerSession.Socket, text);
                     }
                 }
-                return;
             }
-
-            HandleMatchRequest(userId);
         }
 
 
@@ -411,6 +414,40 @@ namespace ServerApp
             _userManager.SetState(opponentId, UserState.InRoom);
             _userManager.SetState(userId, UserState.InRoom);
             _waitingUserId = null;
+
+            if (_userManager.TryGetSession(opponentId, out ClientSession opponentSession))
+            {
+                ServerSend.MatchFound(opponentSession.Socket, roomId, (uint)Stone.Black, true);
+            }
+
+            if (_userManager.TryGetSession(userId, out ClientSession userSession))
+            {
+                ServerSend.MatchFound(userSession.Socket, roomId, (uint)Stone.White, false);
+            }
+        }
+
+        private void HandleEndGame(int userId)
+        {
+            if (!_userManager.TryGetUser(userId, out SessionInfo info) || !info.RoomId.HasValue)
+            {
+                return;
+            }
+
+            int roomId = info.RoomId.Value;
+            if (!_rooms.TryGetValue(roomId, out Room room))
+            {
+                _userManager.SetRoom(userId, null);
+                _userManager.SetState(userId, UserState.Connected);
+                return;
+            }
+
+            foreach (int playerId in room.GetPlayers())
+            {
+                _userManager.SetRoom(playerId, null);
+                _userManager.SetState(playerId, UserState.Connected);
+            }
+
+            _rooms.Remove(roomId);
         }
 
         private void HandleSystemEvent(SystemEvent systemEvent)
